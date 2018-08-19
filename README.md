@@ -12,7 +12,7 @@ This application is built to load test Industrial IoT assets hierarchy with Azur
 ```
 -b 1000
 ```
-- Name of the root node (e.g. Industrial Plant Id). This value will serve as the partition key of the Cosmos DB collection. It will also be prefixed in all children vertex Ids for convinience.
+- Name of the root node (e.g. Industrial Plant Id). This value will serve as the **partition key** of the Cosmos DB collection. It will also be prefixed in all children Vertex Ids for convenience.
 ```
 -r plant13
 ```
