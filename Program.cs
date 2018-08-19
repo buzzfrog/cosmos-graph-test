@@ -11,20 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-/* 
-    Documentation
-    
-    Connection String
-        Example: 
-            AccountEndpoint=https://<cosmosdb-name>.documents.azure.com:443/;AccountKey=yh[...]==;ApiKind=Gremlin;Database=db01;Collection=col01
-        Run in Code:
-            Add -c <connection string> in the args collection in launch.json
-
-    Third party components
-        * CommandLineParser - https://github.com/commandlineparser/commandline
-        * Chance - https://github.com/gmantaos/Chance.NET
-
- */
 namespace cosmosdb_graph_test
 {
     class Program
