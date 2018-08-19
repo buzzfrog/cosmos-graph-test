@@ -12,7 +12,7 @@ This application is built to load test Industrial IoT assets hierarchy with Azur
 ```
 -b 1000
 ```
-- Name of the root node (e.g. industrial plant id). This name will also be prefixed in all children vertex Ids.
+- Name of the root node (e.g. Industrial Plant Id). This value will serve as the partition key of the Cosmos DB collection. It will also be prefixed in all children vertex Ids for convinience.
 ```
 -r plant13
 ```
@@ -30,10 +30,10 @@ The above script will perform the following actions;
 1. Create the resource group in Western Europe if needed.
 2. Create a Cosmos DB account with Gremlin API if needed.
 3. Create Cosmos DB database if needed.
-4. Recreate Cosmos DB collection with specified RU throughput and partition key.
+4. Recreate Cosmos DB collection with specified RU throughput and partition key. This can be prevented by passing an additional flag to the script.
 5. Create an Azure Container Registry if needed.
-6. Use ACR Build to build the docker image of the application if needed. This can also be forced with an additional parameter to the script.
-7. Based on the provisioned Cosmos DB RU, create `Min(RU/10000, 20)` Azure Container Instances.
+6. Use ACR Build to build the docker image of the application if needed. This can also be forced with an additional flag to the script.
+7. Based on the provisioned Cosmos DB RU, create `Min(RU/10000, 20)` Azure Container Instances. Each ACI Id will be passed to the application's `-r` parameter.
 
 ## Resources
 - [.NET sample of Bulk Executor Utility for Azure Cosmos DB Gremlin API](https://github.com/Azure-Samples/azure-cosmosdb-graph-bulkexecutor-dotnet-getting-started)
