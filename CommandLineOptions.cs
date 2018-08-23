@@ -12,5 +12,9 @@ namespace cosmosdb_graph_test
 
         [Option('b', "batch-size", Required = false, HelpText = "Batch size", Default = 1000)]
         public int BatchSize { get; set; }
+
+        [Option('n', "numberofnodesoneachlevel", Required = false, HelpText = "Number of nodes to create on each level", Default = 18)]
+        public int NumberOfNodesOnEachLevel { get; set; }
+
     }
 }

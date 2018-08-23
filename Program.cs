@@ -21,6 +21,7 @@ namespace cosmosdb_graph_test
         private static string _unparsedConnectionString;
         private static string _rootNodeId;
         private static int _batchSize;
+        private static int _numberOfNodesOnEachLevel;
 
         private static string _accountEndpoint;
         private static string _accountKey;
@@ -53,6 +54,7 @@ namespace cosmosdb_graph_test
             _unparsedConnectionString = result.Value.ConnectionString;
             _rootNodeId = result.Value.RootNode.Trim();
             _batchSize = result.Value.BatchSize;
+            _numberOfNodesOnEachLevel = result.Value.NumberOfNodesOnEachLevel;
 
             ParseConnectionString(_unparsedConnectionString);            
 
@@ -71,7 +73,6 @@ namespace cosmosdb_graph_test
 
             stopwatch.Stop();
             Console.WriteLine($"Added {_totalElements} graph elements in {stopwatch.ElapsedMilliseconds} ms");
-            //Console.ReadKey();
         }
 
         private static async Task InitializeCosmosDbAsync()
@@ -157,16 +158,12 @@ namespace cosmosdb_graph_test
             switch (level)
             {
                 case 1:
-                    numberOfNodesToCreate = 18;//_random.Next(1, 10);
-                    break;
                 case 2:
-                    numberOfNodesToCreate = 18;//_random.Next(1, 100);
-                    break;
                 case 3:
-                    numberOfNodesToCreate = 18;//_random.Next(1, 40);
+                    numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     break;
                 case 4:
-                    numberOfNodesToCreate = 18;//_random.Next(1, 20);
+                    numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     label = "asset";
                     properties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"siemens", "abb", "vortex", "mulvo", "ropert"})},
@@ -176,7 +173,7 @@ namespace cosmosdb_graph_test
                     };
                     break;
                 case 5:
-                    numberOfNodesToCreate = 18;//_random.Next(1, 20);
+                    numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     label = "asset";
                     properties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"siemens", "abb", "vortex", "mulvo", "ropert"})},
@@ -184,6 +181,9 @@ namespace cosmosdb_graph_test
                         {"serial", _chance.Guid().ToString()},
                         {"comments", _chance.Sentence(30)}                          
                     };
+                    break;
+                default:
+                    numberOfNodesToCreate = 0;
                     break;
             }
 
