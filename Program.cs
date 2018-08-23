@@ -166,7 +166,7 @@ namespace cosmosdb_graph_test
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     label = "asset";
                     properties = new Dictionary<string, object>() {
-                        {"manufacturer", _chance.PickOne(new string[] {"siemens", "abb", "vortex", "mulvo", "ropert"})},
+                        {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
                         {"serial", _chance.Guid().ToString()},
                         {"comments", _chance.Sentence(30)}                          
@@ -176,7 +176,7 @@ namespace cosmosdb_graph_test
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     label = "asset";
                     properties = new Dictionary<string, object>() {
-                        {"manufacturer", _chance.PickOne(new string[] {"siemens", "abb", "vortex", "mulvo", "ropert"})},
+                        {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
                         {"serial", _chance.Guid().ToString()},
                         {"comments", _chance.Sentence(30)}                          
