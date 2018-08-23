@@ -44,9 +44,11 @@ namespace cosmosdb_graph_test
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var result = (Parsed<CommandLineOptions>)Parser.Default.ParseArguments<CommandLineOptions>(args);
-            if (result.Tag != ParserResultType.Parsed)
+            var resultFromParsing = Parser.Default.ParseArguments<CommandLineOptions>(args);
+            if (resultFromParsing.Tag != ParserResultType.Parsed)
                 return;
+
+            var result = (Parsed<CommandLineOptions>)resultFromParsing;
 
             _unparsedConnectionString = result.Value.ConnectionString;
             _rootNodeId = result.Value.RootNode.Trim();
