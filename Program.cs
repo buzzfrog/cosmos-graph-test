@@ -2,7 +2,6 @@
 using CommandLine;
 using Microsoft.Azure.CosmosDB.BulkExecutor;
 using Microsoft.Azure.CosmosDB.BulkExecutor.Graph;
-using Microsoft.Azure.CosmosDB.BulkExecutor.Graph.Element;
 using Microsoft.Azure.Documents.Client;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,6 @@ namespace cosmosdb_graph_test
 {
     class Program
     {
-        private static Random _random = new Random();
         private static Chance _chance = new Chance();
 
         private static string _unparsedConnectionString;
@@ -60,7 +58,7 @@ namespace cosmosdb_graph_test
 
             ParseConnectionString(_unparsedConnectionString);            
 
-            if (DoWeHaveAllParameters())
+            if (CommandLineUtils.DoWeHaveAllParameters(_apiKind, _accountEndpoint, _accountKey, _database, _collection))
             {
                 InitializeCosmosDbAsync().Wait();
 
@@ -89,25 +87,14 @@ namespace cosmosdb_graph_test
                 Console.WriteLine($"Inserting process {i} of {numberOfProcessToInsert}");
                 for (int j = 0; j < 10; j++)
                 {
-                    var sourceId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
-                    var destinationId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
 
-                    var edge = CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
+                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
                     await BulkInsertAsync(edge);
 
                 }
             }
-        }
-
-        private static string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel)
-        {
-            var sb = new StringBuilder(rootNodeId);
-            for (int i = 0; i < levelsInGraph; i++)
-            {
-                sb.Append("-" + _random.Next(numberOfNodesOnEachLevel).ToString());
-            }
-
-            return sb.ToString();
         }
 
         private static async Task InitializeCosmosDbAsync()
@@ -128,60 +115,6 @@ namespace cosmosdb_graph_test
             // Set retries to 0 to pass complete control to bulk executor.
             _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
             _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
-        }
-
-        private static bool DoWeHaveAllParameters()
-        {
-            // ApiKind needs to be Gremlin
-            if (_apiKind.ToLower() != "gremlin")
-                return false;
-
-            if (_accountEndpoint != string.Empty && _accountKey != string.Empty && 
-                _database != string.Empty && _collection != string.Empty)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private static void ParseConnectionString(string unparsedConnectionString)
-        {
-            foreach (var part in unparsedConnectionString.Trim().Split(';'))
-            {
-                switch (GetKeyFromPart(part.ToLower()))
-                {
-                    case "accountendpoint":
-                        _accountEndpoint = GetValueFromPart(part);
-                        break;
-                    case "accountkey":
-                        _accountKey = GetValueFromPart(part);
-                        break;
-                    case "apikind":
-                        _apiKind = GetValueFromPart(part);
-                        break;
-                    case "database":
-                        _database = GetValueFromPart(part);
-                        break;
-                    case "collection":
-                        _collection = GetValueFromPart(part);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private static string GetValueFromPart(string part)
-        {
-            return part.Split(new[] { '=' }, 2)[1];
-        }
-
-        private static string GetKeyFromPart(string part)
-        {
-            return part.Split(new[] { '=' }, 2)[0];
         }
 
         private static async Task InsertNodeAsync(string id, string parentId, string parentLabel, int level)
@@ -222,7 +155,7 @@ namespace cosmosdb_graph_test
                     break;
             }
 
-            properties.Add(_partitionKey, CreatePartitionKey(id));
+            properties.Add(_partitionKey, Utils.CreatePartitionKey(id));
             properties.Add("level", level);
             properties.Add("createdAt", DateTimeOffset.Now.ToUnixTimeMilliseconds());
             properties.Add("name", id);
@@ -231,12 +164,12 @@ namespace cosmosdb_graph_test
             var padding = new StringBuilder().Append('-', level).ToString();
             Console.WriteLine($"{padding} {id}");
 
-            var vertex = CreateGremlinVertex(id, label, properties);
+            var vertex = Utils.CreateGremlinVertex(id, label, properties);
             await BulkInsertAsync(vertex);
 
             if (parentId != string.Empty)
             {
-                var edge = CreateGremlinEdge("child", parentId, id, parentLabel, label);
+                var edge = Utils.CreateGremlinEdge("child", parentId, id, parentLabel, label);
                 await BulkInsertAsync(edge);
             }
 
@@ -244,30 +177,6 @@ namespace cosmosdb_graph_test
             {
                 await InsertNodeAsync($"{id}-{i}", id, label, level + 1);
             }
-        }
-
-        private static GremlinVertex CreateGremlinVertex(string id, string label, 
-            Dictionary<string, object> properties)
-        {
-            var vertex = new GremlinVertex(id, label);
-
-            foreach (var property in properties)
-            {
-                vertex.AddProperty(property.Key, property.Value);
-            }
-
-            return vertex;
-        }
-
-        private static GremlinEdge CreateGremlinEdge(string edgeLabel, string sourceId, string destinationId, 
-            string sourceLabel, string destinationLabel, string edgeIdSuffix = null)
-        {
-            var edgeId = $"{sourceId} -> {destinationId}{edgeIdSuffix}";
-            var edge = new GremlinEdge(edgeId, edgeLabel, sourceId, destinationId, 
-                sourceLabel, destinationLabel, CreatePartitionKey(sourceId), CreatePartitionKey(destinationId));
-
-            edge.AddProperty("model", "primary");
-            return edge;
         }
 
         private static async Task BulkInsertAsync(object graphElement)
@@ -293,16 +202,30 @@ namespace cosmosdb_graph_test
             _graphElementsToAdd.Clear();
         }
 
-        private static string CreatePartitionKey(string id)
+        private static void ParseConnectionString(string unparsedConnectionString)
         {
-            var idParts = id.Split('-');
-            if(idParts.Length < 2)
+            foreach (var part in unparsedConnectionString.Trim().Split(';'))
             {
-                return id;
-            }
-            else
-            {
-                return idParts[0] + "-" + idParts[1];
+                switch (CommandLineUtils.GetKeyFromPart(part.ToLower()))
+                {
+                    case "accountendpoint":
+                        _accountEndpoint = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "accountkey":
+                        _accountKey = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "apikind":
+                        _apiKind = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "database":
+                        _database = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "collection":
+                        _collection = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
