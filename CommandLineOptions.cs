@@ -16,5 +16,8 @@ namespace cosmosdb_graph_test
         [Option('n', "numberofnodesoneachlevel", Required = false, HelpText = "Number of nodes to create on each level", Default = 18)]
         public int NumberOfNodesOnEachLevel { get; set; }
 
+        [Option('a', "additiontraversals", Required = false, HelpText = "Number of additional traversals to create", Default = 20000)]
+        public int NumberOfTraversalsToAdd { get; set; }
+
     }
 }

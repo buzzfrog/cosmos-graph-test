@@ -22,6 +22,7 @@ namespace cosmosdb_graph_test
         private static string _rootNodeId;
         private static int _batchSize;
         private static int _numberOfNodesOnEachLevel;
+        private static int _numberOfTraversals;
 
         private static string _accountEndpoint;
         private static string _accountKey;
@@ -55,13 +56,19 @@ namespace cosmosdb_graph_test
             _rootNodeId = result.Value.RootNode.Trim();
             _batchSize = result.Value.BatchSize;
             _numberOfNodesOnEachLevel = result.Value.NumberOfNodesOnEachLevel;
+            _numberOfTraversals = result.Value.NumberOfTraversalsToAdd;
 
             ParseConnectionString(_unparsedConnectionString);            
 
             if (DoWeHaveAllParameters())
             {
                 InitializeCosmosDbAsync().Wait();
+
+                // Insert main hierarchy of nodes and edges as a tree
                 InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1).Wait();
+
+                // Add random edges to nodes
+                InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals).Wait();
 
                 // Import remaining vertices and edges
                 BulkImportToCosmosDbAsync().Wait();
@@ -73,6 +80,34 @@ namespace cosmosdb_graph_test
 
             stopwatch.Stop();
             Console.WriteLine($"Added {_totalElements} graph elements in {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        private static async Task InsertRandomEdgesAsync(string rootNodeId, int numberOfProcessToInsert)
+        {
+            for (int i = 0; i < numberOfProcessToInsert; i++)
+            {
+                Console.WriteLine($"Inserting process {i} of {numberOfProcessToInsert}");
+                for (int j = 0; j < 10; j++)
+                {
+                    var sourceId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    var destinationId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+
+                    var edge = CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
+                    await BulkInsertAsync(edge);
+
+                }
+            }
+        }
+
+        private static string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel)
+        {
+            var sb = new StringBuilder(rootNodeId);
+            for (int i = 0; i < levelsInGraph; i++)
+            {
+                sb.Append("-" + _random.Next(numberOfNodesOnEachLevel).ToString());
+            }
+
+            return sb.ToString();
         }
 
         private static async Task InitializeCosmosDbAsync()
@@ -153,7 +188,7 @@ namespace cosmosdb_graph_test
         {
             var numberOfNodesToCreate = 0;
             var properties = new Dictionary<string, object>();
-            var label = "node";            
+            var label = "asset";            
 
             switch (level)
             {
@@ -164,7 +199,7 @@ namespace cosmosdb_graph_test
                     break;
                 case 4:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    label = "asset";
+                    //label = "asset";
                     properties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
@@ -174,7 +209,7 @@ namespace cosmosdb_graph_test
                     break;
                 case 5:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    label = "asset";
+                    //label = "asset";
                     properties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
@@ -187,7 +222,7 @@ namespace cosmosdb_graph_test
                     break;
             }
 
-            properties.Add(_partitionKey, _rootNodeId);
+            properties.Add(_partitionKey, CreatePartitionKey(id));
             properties.Add("level", level);
             properties.Add("createdAt", DateTimeOffset.Now.ToUnixTimeMilliseconds());
             properties.Add("name", id);
@@ -201,7 +236,7 @@ namespace cosmosdb_graph_test
 
             if (parentId != string.Empty)
             {
-                var edge = CreateGremlinEdge(parentId, id, parentLabel, label);
+                var edge = CreateGremlinEdge("child", parentId, id, parentLabel, label);
                 await BulkInsertAsync(edge);
             }
 
@@ -224,12 +259,12 @@ namespace cosmosdb_graph_test
             return vertex;
         }
 
-        private static GremlinEdge CreateGremlinEdge(string sourceId, string destinationId, 
-            string sourceLabel, string destinationLabel)
+        private static GremlinEdge CreateGremlinEdge(string edgeLabel, string sourceId, string destinationId, 
+            string sourceLabel, string destinationLabel, string edgeIdSuffix = null)
         {
-            var edgeId = $"{sourceId} -> {destinationId}";
-            var edge = new GremlinEdge(edgeId, "child", sourceId, destinationId, 
-                sourceLabel, destinationLabel, _rootNodeId, _rootNodeId);
+            var edgeId = $"{sourceId} -> {destinationId}{edgeIdSuffix}";
+            var edge = new GremlinEdge(edgeId, edgeLabel, sourceId, destinationId, 
+                sourceLabel, destinationLabel, CreatePartitionKey(sourceId), CreatePartitionKey(destinationId));
 
             edge.AddProperty("model", "primary");
             return edge;
@@ -256,6 +291,19 @@ namespace cosmosdb_graph_test
                 throw new Exception($"BulkExecutor found {response.BadInputDocuments.Count} bad input graph element(s)!");
 
             _graphElementsToAdd.Clear();
+        }
+
+        private static string CreatePartitionKey(string id)
+        {
+            var idParts = id.Split('-');
+            if(idParts.Length < 2)
+            {
+                return id;
+            }
+            else
+            {
+                return idParts[0] + "-" + idParts[1];
+            }
         }
     }
 }

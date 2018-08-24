@@ -18,6 +18,15 @@ This application is built to load test Industrial IoT assets hierarchy with Azur
 ```
 -r plant13
 ```
+- Nodes on each level
+```
+-n 18
+```
+- Addition traversals to add. Each traversal creates ten edges between ten random selected nodes
+```
+-a 200000
+```
+
 
 ## Scale Out
 We can scale out the load generation process by spawning multiple instances of this app and each time provide a different `-r` parameter. In order to not throttle CPU, memory and network badwidth by running on a single machine, we've containerized this application. Now it can be provisioned very easily with Azure Container Instances.
