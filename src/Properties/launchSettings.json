@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "cosmosdb-graph-test": {
+      "commandName": "Project",
+      "commandLineArgs": "-r 1 -c AccountEndpoint=https://dagk-eq-cosmos.documents.azure.com:443/;AccountKey=U8WB0cNFR0QvWT0jBouMnIqYtZo8lBMsGiskrzHNiGmuavySbwmYK3Ur2xvNBuVhAv3HHnrxhYBNf3dO2Kugbw==;ApiKind=Gremlin;Database=db001;Collection=col0014 -n 10 -b 1000 -a 1000000"
+    }
+  }
+}
