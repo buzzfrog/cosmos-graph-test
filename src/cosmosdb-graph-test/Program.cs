@@ -100,8 +100,10 @@ namespace cosmosdb_graph_test
         private static async Task InitializeCosmosDbAsync()
         {
             _documentClient = new DocumentClient(new Uri(_accountEndpoint), _accountKey, _connectionPolicy);
-            var dataCollection = _documentClient.CreateDocumentCollectionQuery(UriFactory.CreateDatabaseUri(_database))
-                .Where(c => c.Id == _collection).AsEnumerable().FirstOrDefault();
+            var d = _documentClient.CreateDocumentCollectionQuery(UriFactory.CreateDatabaseUri(_database));
+
+            var dataCollection = d.Where(c => c.Id == _collection).AsEnumerable().FirstOrDefault();
+
 
             _partitionKey = dataCollection.PartitionKey.Paths.First().Replace("/", string.Empty);
 
