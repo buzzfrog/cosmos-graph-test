@@ -39,7 +39,7 @@ namespace cosmosdb_graph_test_tests
 
 
             var dataCreator = new DataCreator(documentClient.Object, bulkExecutor.Object);
-            var result =  dataCreator.InitializeBulkExecutorAsync(database, collection, null).GetAwaiter().GetResult();
+            var result =  dataCreator.InitializeBulkExecutorAsync(database, collection).GetAwaiter().GetResult();
 
             Assert.AreEqual(connectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests, 0);
             Assert.AreEqual(connectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds, 0);

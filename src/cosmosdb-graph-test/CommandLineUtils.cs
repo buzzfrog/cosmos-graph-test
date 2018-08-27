@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace cosmosdb_graph_test
 {
     internal class CommandLineUtils
@@ -34,5 +36,46 @@ namespace cosmosdb_graph_test
                 return false;
             }
         }
+
+        internal static (string accountEndPoint, 
+                         string accountKey, 
+                         string apiKind, 
+                         string database, 
+                         string collection) ParseConnectionString(string unparsedConnectionString)
+        { 
+
+            string accountEndPoint = "";
+            string accountKey = "";
+            string apiKind = "";
+            string database = "";
+            string collection = "";
+        
+            foreach (var part in unparsedConnectionString.Trim().Split(';'))
+            {
+                switch (CommandLineUtils.GetKeyFromPart(part.ToLower()))
+                {
+                    case "accountendpoint":
+                        accountEndPoint = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "accountkey":
+                        accountKey = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "apikind":
+                        apiKind = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "database":
+                        database = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    case "collection":
+                        collection = CommandLineUtils.GetValueFromPart(part);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return (accountEndPoint, accountKey, apiKind, database, collection);
+        }
     }
 }
+
