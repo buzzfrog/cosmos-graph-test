@@ -16,17 +16,13 @@ namespace cosmosdb_graph_test_tests
             string database = "db001";
             string collection = "col003";
 
-            (string AccountEndPoint, 
-             string AccountKey, 
-             string ApiKind, 
-             string Database, 
-             string Collection) result  =  CommandLineUtils.ParseConnectionString("AccountEndpoint=https://graph-database.documents.azure.com:443/;AccountKey=FakeKeyU8WB0cNFR0QvWT0jBouMnIqYuavySbwmYK3Ur2xvNBuVhAv3HHnrxhYBNf3dO2Kugbw==;ApiKind=Gremlin;Database=db001;Collection=col003");
-
-            Assert.AreEqual(result.AccountEndPoint, accountEndPoint);
-            Assert.AreEqual(result.AccountKey, accountKey);
-            Assert.AreEqual(result.ApiKind, apiKind);
-            Assert.AreEqual(result.Database, database);
-            Assert.AreEqual(result.Collection, collection);
+             var result =  CommandLineUtils.ParseConnectionString("AccountEndpoint=https://graph-database.documents.azure.com:443/;AccountKey=FakeKeyU8WB0cNFR0QvWT0jBouMnIqYuavySbwmYK3Ur2xvNBuVhAv3HHnrxhYBNf3dO2Kugbw==;ApiKind=Gremlin;Database=db001;Collection=col003");
+           
+            Assert.AreEqual(result.accountEndPoint, accountEndPoint);
+            Assert.AreEqual(result.accountKey, accountKey);
+            Assert.AreEqual(result.apiKind, apiKind);
+            Assert.AreEqual(result.database, database);
+            Assert.AreEqual(result.collection, collection);
         }
     }
 }
