@@ -1,5 +1,7 @@
 # cosmos-graph-test
 
+[![Build status](https://vjrantal.visualstudio.com/cosmos-graph-test/_apis/build/status/cosmos-graph-test-.NET%20Desktop-CI)](https://vjrantal.visualstudio.com/cosmos-graph-test/_build/latest?definitionId=2)
+
 This application is built to load test Industrial IoT assets hierarchy with Azure Cosmos DB Graph API. It will attempt to generate millions of assets as vertices and the relationships between them as edges and divide these into 6 levels (currently configured in code).
 
 > This only works for Cosmos Db databases with partitions.
