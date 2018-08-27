@@ -18,7 +18,7 @@ INSTANCES=$((RU_THROUGHPUT/10000))
 INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
 
 PARTITION_KEY="_partitionKey"
-BATCH_SIZE=1000
+BATCH_SIZE=5000
 NODES_ON_EACH_LEVEL=18
 ADDITIONAL_TRAVERSALS=100000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
@@ -45,11 +45,14 @@ if [[ "$DATABASE_EXISTS" != true ]]; then
   az cosmosdb database create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE
 fi
 
+COLLECTION_EXISTS=$(az cosmosdb collection exists -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION -o tsv)
+if [[ "$COLLECTION_EXISTS" != true ]]; then EMPTY_COLLECTION=false; fi
+
 if [[ "$EMPTY_COLLECTION" = true ]]; then
   az cosmosdb collection delete -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION
+  COLLECTION_EXISTS=false
 fi
 
-COLLECTION_EXISTS=$(az cosmosdb collection exists -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION -o tsv)
 if [[ "$COLLECTION_EXISTS" != true ]]; then
     az cosmosdb collection create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT \
         --db-name $DATABASE --collection-name $COLLECTION \
