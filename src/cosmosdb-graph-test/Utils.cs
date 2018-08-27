@@ -48,14 +48,7 @@ namespace cosmosdb_graph_test
         internal static string CreatePartitionKey(string id)
         {
             var idParts = id.Split('-');
-            if (idParts.Length < 2)
-            {
-                return id;
-            }
-            else
-            {
-                return idParts[0] + "-" + idParts[1];
-            }
+            return idParts[0];
         }
     }
 }

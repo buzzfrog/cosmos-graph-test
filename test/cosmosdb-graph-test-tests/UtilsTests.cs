@@ -19,10 +19,10 @@ namespace cosmosdb_graph_test_tests
         }
 
         [TestMethod]
-        public void CreatePartitionKey_With_ThreeLevels_ShouldReturnTwoLevels()
+        public void CreatePartitionKey_With_ThreeLevels_ShouldReturnOneLevel()
         {
             var parameter = "1-2-3";
-            var answer = "1-2";
+            var answer = "1";
 
             var result = Utils.CreatePartitionKey(parameter);
 
