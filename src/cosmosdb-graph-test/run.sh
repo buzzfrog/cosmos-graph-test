@@ -17,8 +17,10 @@ RU_THROUGHPUT=100000
 INSTANCES=$((RU_THROUGHPUT/10000))
 INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
 
-PARTITION_KEY="partitionId"
-BATCH_SIZE=5000
+PARTITION_KEY="_partitionKey"
+BATCH_SIZE=1000
+NUMBEROFNODESONEACHLEVEL=18
+ADDITIONALTRAVERSALS=100000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
 IMAGE_NAME="cosmos-graph-test"
 IMAGE_TAG="1.0"
@@ -79,5 +81,5 @@ do
         --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING"
+        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NUMBEROFNODESONEACHLEVEL -a $ADDITIONALTRAVERSALS"
 done
