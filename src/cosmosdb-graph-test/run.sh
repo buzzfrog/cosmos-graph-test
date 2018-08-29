@@ -18,9 +18,9 @@ INSTANCES=$((RU_THROUGHPUT/10000))
 INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
 
 PARTITION_KEY="_partitionKey"
-BATCH_SIZE=1000
+BATCH_SIZE=5000
 NUMBEROFNODESONEACHLEVEL=18
-ADDITIONALTRAVERSALS=100000
+ADDITIONALTRAVERSALS=500000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
 IMAGE_NAME="cosmos-graph-test"
 IMAGE_TAG="1.0"
@@ -53,7 +53,28 @@ COLLECTION_EXISTS=$(az cosmosdb collection exists -g $RESOURCE_GROUP -n $COSMOSD
 if [[ "$COLLECTION_EXISTS" != true ]]; then
     az cosmosdb collection create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT \
         --db-name $DATABASE --collection-name $COLLECTION \
-        --throughput $RU_THROUGHPUT --partition-key-path "/$PARTITION_KEY"
+        --throughput $RU_THROUGHPUT --partition-key-path "/$PARTITION_KEY" \
+		--indexing-policy '{
+      "indexingMode": "lazy",
+      "automatic": true,
+      "includedPaths": [
+        {
+          "path": "/*",
+          "indexes": [
+            {
+              "kind": "Range",
+              "dataType": "String",
+              "precision": -1
+            },
+            {
+              "kind": "Range",
+              "dataType": "Number",
+              "precision": -1
+            }
+          ]
+        }
+      ]
+    }'
 fi
 
 ACR_EXISTS=$(az acr list -g $RESOURCE_GROUP --query "[].contains(name, '$ACR_NAME')" -o tsv)
