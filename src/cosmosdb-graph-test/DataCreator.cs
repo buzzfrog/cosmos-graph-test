@@ -164,7 +164,7 @@ namespace cosmosdb_graph_test
                     var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
                     var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
 
-                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
+                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString() + "_" + j.ToString());
                     await BulkInsertAsync(edge);
 
                 }
