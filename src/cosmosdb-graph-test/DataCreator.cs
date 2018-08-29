@@ -13,6 +13,8 @@ namespace cosmosdb_graph_test
     class DataCreator
     {
         private static Chance _chance = new Chance();
+        private IDatabase _database;
+        private IExecutor _executor;
         private IDocumentClient _documentClient;
         private IBulkExecutor _bulkExecutor;
         private string _rootNodeId;
@@ -23,44 +25,34 @@ namespace cosmosdb_graph_test
         private long _totalElements = 0;
         private IList<object> _graphElementsToAdd = new List<object>();
 
-
-
-        public DataCreator(IDocumentClient documentClient, IBulkExecutor bulkExecutor)
+        public DataCreator(IDatabase database, IExecutor executor)
         {
-            _documentClient = documentClient;
-            _bulkExecutor = bulkExecutor;
+            _database = database;
+            _executor = executor;
+
         }
 
-        public async Task<bool> InitializeBulkExecutorAsync(string Database, string Collection)
+        public async Task InitializeAsync(string accountEndpoint, string accountKey, string database, string collection)
         {
-            try
-            {
-                var documentCollection = _documentClient.CreateDocumentCollectionQuery(UriFactory.CreateDatabaseUri(Database), null);
+            _documentClient = _database.Initialize(accountEndpoint, accountKey);
 
-                var dataCollection = documentCollection.Where(c => c.Id == Collection).AsEnumerable().FirstOrDefault();
+            var documentCollections = _documentClient.CreateDocumentCollectionQuery(UriFactory.CreateDatabaseUri(database), null);
+            var documentCollection = documentCollections.Where(c => c.Id == collection).AsEnumerable().FirstOrDefault();
 
-                _partitionKey = dataCollection.PartitionKey.Paths.First().Replace("/", string.Empty);
+            _partitionKey = documentCollection.PartitionKey.Paths.First().Replace("/", string.Empty);
 
-                // Set retry options high during initialization (default values).
-                _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
-                _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
+            // Set retry options high during initialization (default values).
+            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
+            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
 
-                await _bulkExecutor.InitializeAsync();
+            _bulkExecutor = _executor.Initialize(_documentClient, documentCollection);
 
-                // Set retries to 0 to pass complete control to bulk executor.
-                _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
-                _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
-            }
-            catch
-            {
-                return false;
-
-            }
-
-            return true;
+            // Set retries to 0 to pass complete control to bulk executor.
+            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
+            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
         }
 
-        public void Start(string RootNodeIt, int BatchSize, int NumberOfNodesOnEachLevel, int NumberOfTraversals)
+        public async Task<long> StartAsync(string RootNodeIt, int BatchSize, int NumberOfNodesOnEachLevel, int NumberOfTraversals)
         {
             _rootNodeId = RootNodeIt;
             _batchSize = BatchSize;
@@ -68,7 +60,7 @@ namespace cosmosdb_graph_test
             _numberOfTraversals = NumberOfTraversals;
 
             // Insert main hierarchy of nodes and edges as a tree
-            InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1).Wait();
+            InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1).GetAwaiter().GetResult();
 
             // Add random edges to nodes
             InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals).Wait();
@@ -76,6 +68,7 @@ namespace cosmosdb_graph_test
             // Import remaining vertices and edges
             BulkImportToCosmosDbAsync().Wait();
 
+            return _totalElements;
         }
 
         internal async Task InsertNodeAsync(string id, string parentId, string parentLabel, int level)
@@ -154,11 +147,7 @@ namespace cosmosdb_graph_test
         {
             Console.WriteLine($"Graph elements inserted until now: {_totalElements}");
 
-            var response = await _bulkExecutor.BulkImportAsync(
-                 documents: _graphElementsToAdd);
-
-            if (response.BadInputDocuments.Any())
-                throw new Exception($"BulkExecutor found {response.BadInputDocuments.Count} bad input graph element(s)!");
+            await _executor.BulkImportAsync(_graphElementsToAdd);
 
             _graphElementsToAdd.Clear();
         }
