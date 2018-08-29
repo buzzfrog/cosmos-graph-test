@@ -18,9 +18,9 @@ INSTANCES=$((RU_THROUGHPUT/10000))
 INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
 
 PARTITION_KEY="_partitionKey"
-BATCH_SIZE=5000
+BATCH_SIZE=1000
 NUMBEROFNODESONEACHLEVEL=18
-ADDITIONALTRAVERSALS=500000
+ADDITIONALTRAVERSALS=100000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
 IMAGE_NAME="cosmos-graph-test"
 IMAGE_TAG="1.0"
@@ -45,11 +45,14 @@ if [[ "$DATABASE_EXISTS" != true ]]; then
   az cosmosdb database create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE
 fi
 
+COLLECTION_EXISTS=$(az cosmosdb collection exists -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION -o tsv)
+if [[ "$COLLECTION_EXISTS" != true ]]; then EMPTY_COLLECTION=false; fi
+
 if [[ "$EMPTY_COLLECTION" = true ]]; then
   az cosmosdb collection delete -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION
+  COLLECTION_EXISTS=false
 fi
 
-COLLECTION_EXISTS=$(az cosmosdb collection exists -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --db-name $DATABASE --collection-name $COLLECTION -o tsv)
 if [[ "$COLLECTION_EXISTS" != true ]]; then
     az cosmosdb collection create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT \
         --db-name $DATABASE --collection-name $COLLECTION \
@@ -102,5 +105,5 @@ do
         --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NUMBEROFNODESONEACHLEVEL -a $ADDITIONALTRAVERSALS"
+        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS"
 done
