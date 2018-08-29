@@ -60,16 +60,16 @@ namespace cosmosdb_graph_test
 
             if (CommandLineUtils.DoWeHaveAllParameters(_apiKind, _accountEndpoint, _accountKey, _database, _collection))
             {
-                InitializeCosmosDbAsync().Wait();
+                InitializeCosmosDbAsync().GetAwaiter().GetResult();
 
                 // Insert main hierarchy of nodes and edges as a tree
                 InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1).Wait();
 
                 // Add random edges to nodes
-                InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals).Wait();
+                InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals).GetAwaiter().GetResult();
 
                 // Import remaining vertices and edges
-                BulkImportToCosmosDbAsync().Wait();
+                BulkImportToCosmosDbAsync().GetAwaiter().GetResult();
             }
             else
             {
@@ -90,9 +90,8 @@ namespace cosmosdb_graph_test
                     var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
                     var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
 
-                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
+                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString() + "-" + j.ToString());
                     await BulkInsertAsync(edge);
-
                 }
             }
         }
