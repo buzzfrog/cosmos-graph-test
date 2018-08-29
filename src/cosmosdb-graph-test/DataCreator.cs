@@ -17,6 +17,7 @@ namespace cosmosdb_graph_test
         private IExecutor _executor;
         private IDocumentClient _documentClient;
         private IBulkExecutor _bulkExecutor;
+        private IRandom _random;
         private string _rootNodeId;
         private int _batchSize;
         private int _numberOfNodesOnEachLevel;
@@ -25,10 +26,11 @@ namespace cosmosdb_graph_test
         private long _totalElements = 0;
         private IList<object> _graphElementsToAdd = new List<object>();
 
-        public DataCreator(IDatabase database, IExecutor executor)
+        public DataCreator(IDatabase database, IExecutor executor, IRandom random)
         {
             _database = database;
             _executor = executor;
+            _random = random;
 
         }
 
@@ -159,8 +161,8 @@ namespace cosmosdb_graph_test
                 Console.WriteLine($"Inserting process {i} of {numberOfProcessToInsert}");
                 for (int j = 0; j < 10; j++)
                 {
-                    var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
-                    var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
+                    var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
 
                     var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString());
                     await BulkInsertAsync(edge);

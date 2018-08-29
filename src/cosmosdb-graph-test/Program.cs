@@ -40,7 +40,7 @@ namespace cosmosdb_graph_test
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var dataCreator = new DataCreator(new CosmosDBDatabase(), new BulkCosmosDBExecutor());
+                var dataCreator = new DataCreator(new CosmosDBDatabase(), new BulkCosmosDBExecutor(), new SpecialRandom());
                 dataCreator.InitializeAsync(_accountEndpoint, _accountKey, _database, _collection).GetAwaiter().GetResult();
 
                 var totalElementsInserted = dataCreator.StartAsync(_rootNodeId, _batchSize, _numberOfNodesOnEachLevel, _numberOfTraversals).GetAwaiter().GetResult();

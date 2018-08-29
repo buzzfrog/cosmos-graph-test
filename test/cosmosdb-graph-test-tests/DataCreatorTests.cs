@@ -20,6 +20,7 @@ namespace cosmosdb_graph_test_tests
         Mock<IExecutor> _executor;
         Mock<IDocumentClient> _documentClient;
         Mock<IBulkExecutor> _bulkExecutor;
+        Mock<IRandom> _random;
 
         string _database = "testdb001";
         string _collection = "testcollection001";
@@ -34,6 +35,9 @@ namespace cosmosdb_graph_test_tests
             _executor = new Mock<IExecutor>();
             _documentClient = new Mock<IDocumentClient>();
             _bulkExecutor = new Mock<IBulkExecutor>();
+            _random = new Mock<IRandom>();
+
+            _random.Setup(x => x.Next(It.IsAny<int>())).Returns((int i) => new Random().Next(i));
 
             EnumerableQuery<DocumentCollection> queryAnswer = new EnumerableQuery<DocumentCollection>(new List<DocumentCollection>()
             {
@@ -47,7 +51,7 @@ namespace cosmosdb_graph_test_tests
 
             _executor.Setup(x => x.Initialize(It.IsAny<IDocumentClient>(), It.IsAny<DocumentCollection>())).Returns(_bulkExecutor.Object);
 
-            _dataCreator = new DataCreator(_db.Object, _executor.Object);
+            _dataCreator = new DataCreator(_db.Object, _executor.Object, _random.Object);
         }
 
         [TestMethod]
