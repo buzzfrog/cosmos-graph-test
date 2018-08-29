@@ -37,7 +37,8 @@ namespace cosmosdb_graph_test
         internal static string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel)
         {
             var sb = new StringBuilder(rootNodeId);
-            for (int i = 0; i < levelsInGraph; i++)
+            var howManyLevelsShouldWeCreateIdFor = _random.Next(levelsInGraph);
+            for (int i = 0; i < howManyLevelsShouldWeCreateIdFor; i++)
             {
                 sb.Append("-" + _random.Next(numberOfNodesOnEachLevel).ToString());
             }
