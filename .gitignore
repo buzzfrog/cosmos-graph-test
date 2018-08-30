@@ -1,4 +1,4 @@
-*.swp
+/*.swp
 *.*~
 project.lock.json
 .DS_Store
@@ -33,5 +33,5 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 
-Properties/launchSettings.json
+launchSettings.json
 /packages
