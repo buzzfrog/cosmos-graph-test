@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set +x
 
 if [ -z "$1" ]; then echo "RESOURCE_GROUP was not supplied"; exit 1; fi && RESOURCE_GROUP=$1
 if [ -z "$2" ]; then echo "COSMOSDB_ACCOUNT was not supplied"; exit 1; fi && COSMOSDB_ACCOUNT=$2
@@ -17,10 +18,10 @@ RU_THROUGHPUT=100000
 INSTANCES=$((RU_THROUGHPUT/10000))
 INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
 
-PARTITION_KEY="_partitionKey"
-BATCH_SIZE=1000
-NUMBEROFNODESONEACHLEVEL=18
-ADDITIONALTRAVERSALS=100000
+PARTITION_KEY="partitionId"
+BATCH_SIZE=5000
+NODES_ON_EACH_LEVEL=18
+ADDITIONAL_TRAVERSALS=500000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
 IMAGE_NAME="cosmos-graph-test"
 IMAGE_TAG="1.0"
@@ -32,8 +33,11 @@ fi
 
 az container list -g $RESOURCE_GROUP --query "[?starts_with(name, '$IMAGE_NAME')].name" -o tsv | while read container
 do
-    az container delete -g $RESOURCE_GROUP -n $container -y
+    az container delete -g $RESOURCE_GROUP -n $container -y &
 done
+echo "Waiting on the deletion of old containers"
+wait
+echo "All old containers are deleted"
 
 COSMOSDB_EXISTS=$(az cosmosdb check-name-exists -n $COSMOSDB_ACCOUNT -o tsv)
 if [[ "$COSMOSDB_EXISTS" != true ]]; then
@@ -57,7 +61,7 @@ if [[ "$COLLECTION_EXISTS" != true ]]; then
     az cosmosdb collection create -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT \
         --db-name $DATABASE --collection-name $COLLECTION \
         --throughput $RU_THROUGHPUT --partition-key-path "/$PARTITION_KEY" \
-		--indexing-policy '{
+				--indexing-policy '{
       "indexingMode": "lazy",
       "automatic": true,
       "includedPaths": [
@@ -99,11 +103,14 @@ ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query "passwords[0].value" 
 COSMOSDB_KEY=$(az cosmosdb list-keys -g $RESOURCE_GROUP -n $COSMOSDB_ACCOUNT --query primaryMasterKey -o tsv)
 CONNECTION_STRING="AccountEndpoint=https://$COSMOSDB_ACCOUNT.documents.azure.com:443/;AccountKey=$COSMOSDB_KEY;ApiKind=Gremlin;database=$DATABASE;collection=$COLLECTION"
 
+echo "Creating new containers"
 for (( i=0; i<$INSTANCES; i++ ))
 do
     az container create -g $RESOURCE_GROUP -n "$IMAGE_NAME$i" --image $ACR_IMAGE \
         --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS"
+        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS" &
 done
+echo "Waiting until all containers are created"
+wait

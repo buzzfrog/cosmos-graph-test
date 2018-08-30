@@ -1,7 +1,9 @@
 ﻿using Microsoft.Azure.CosmosDB.BulkExecutor.Graph.Element;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace cosmosdb_graph_test
 {
@@ -9,7 +11,7 @@ namespace cosmosdb_graph_test
     {
         private static Random _random = new Random();
 
-        internal static GremlinVertex CreateGremlinVertex(string id, string label, 
+        internal static GremlinVertex CreateGremlinVertex(string id, string label,
             Dictionary<string, object> properties)
         {
             var vertex = new GremlinVertex(id, label);
@@ -22,7 +24,7 @@ namespace cosmosdb_graph_test
             return vertex;
         }
 
-        internal static GremlinEdge CreateGremlinEdge(string edgeLabel, string sourceId, string destinationId, 
+        internal static GremlinEdge CreateGremlinEdge(string edgeLabel, string sourceId, string destinationId,
             string sourceLabel, string destinationLabel, string edgeIdSuffix = null)
         {
             var edgeId = $"{sourceId} -> {destinationId}{edgeIdSuffix}";
@@ -33,13 +35,13 @@ namespace cosmosdb_graph_test
             return edge;
         }
 
-        internal static string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel)
+        internal static string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel, IRandom random)
         {
             var sb = new StringBuilder(rootNodeId);
-            var howManyLevelsShouldWeCreateIdFor = _random.Next(levelsInGraph);
+            var howManyLevelsShouldWeCreateIdFor = random.Next(levelsInGraph);
             for (int i = 0; i < howManyLevelsShouldWeCreateIdFor; i++)
             {
-                sb.Append("-" + _random.Next(numberOfNodesOnEachLevel).ToString());
+                sb.Append("-" + random.Next(numberOfNodesOnEachLevel).ToString());
             }
 
             return sb.ToString();
