@@ -22,6 +22,7 @@ PARTITION_KEY="partitionId"
 BATCH_SIZE=5000
 NODES_ON_EACH_LEVEL=18
 ADDITIONAL_TRAVERSALS=500000
+WARMUP_PERIOD=30000
 ACR_NAME=${RESOURCE_GROUP//[-_]/}
 IMAGE_NAME="cosmos-graph-test"
 IMAGE_TAG="1.0"
@@ -110,7 +111,7 @@ do
         --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS" &
+        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS -w $WARMUP_PERIOD" &
 done
 echo "Waiting until all containers are created"
 wait

@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace cosmosdb_graph_test
 {
@@ -11,6 +12,7 @@ namespace cosmosdb_graph_test
         private static int _batchSize;
         private static int _numberOfNodesOnEachLevel;
         private static int _numberOfTraversals;
+        private static int _warmupPeriod;
 
         private static string _accountEndpoint;
         private static string _accountKey;
@@ -32,6 +34,10 @@ namespace cosmosdb_graph_test
             _batchSize = result.Value.BatchSize;
             _numberOfNodesOnEachLevel = result.Value.NumberOfNodesOnEachLevel;
             _numberOfTraversals = result.Value.NumberOfTraversalsToAdd;
+            _warmupPeriod = result.Value.WarmupPeriod;
+
+            Console.WriteLine($"Warmup Period: {_warmupPeriod} ms");
+            Task.Delay(_warmupPeriod).GetAwaiter().GetResult();
 
             (_accountEndpoint, _accountKey, _apiKind, _database, _collection) = CommandLineUtils.ParseConnectionString(_unparsedConnectionString);
 

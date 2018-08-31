@@ -19,5 +19,7 @@ namespace cosmosdb_graph_test
         [Option('a', "additiontraversals", Required = false, HelpText = "Number of additional traversals to create", Default = 20000)]
         public int NumberOfTraversalsToAdd { get; set; }
 
+        [Option('w', "warmupperiod", Required = false, HelpText = "Warm up period in ms", Default = 0)]
+        public int WarmupPeriod { get; set; }
     }
 }
