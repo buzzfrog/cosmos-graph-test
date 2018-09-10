@@ -1,14 +1,19 @@
-﻿using Microsoft.Azure.Documents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace cosmosdb_graph_test
 {
-    internal interface IDatabase
+    public interface IDatabase
     {
-        IDocumentClient Initialize(string accountEndpoint, string accountKey);
+        Task InitializeAsync();
+
+        Task InsertVertexAsync(string id, string label, Dictionary<string, object> properties, 
+            string partitionKeyValue = "");
+
+        Task InsertEdgeAsync(string edgeLabel, string sourceId, string destinationId,
+            string sourceLabel, string destinationLabel, string sourcePartitionKey,
+            string destinationPartitionKey, string edgeIdSuffix = "");
+
+        Task FlushAsync();
     }
 }

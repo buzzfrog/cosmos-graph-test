@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace cosmosdb_graph_test
 {
-    class Program
+    public class Program
     {
         private static string _unparsedConnectionString;
         private static string _rootNodeId;
@@ -14,15 +14,14 @@ namespace cosmosdb_graph_test
         private static int _numberOfTraversals;
         private static int _warmupPeriod;
 
-        private static string _accountEndpoint;
-        private static string _accountKey;
-        private static string _apiKind;
-        private static string _database;
-        private static string _collection;
+        private static (string accountEndpoint,
+                         string accountKey,
+                         string apiKind,
+                         string database,
+                         string collection) _cosmosDbConnectionString;
 
         private static void Main(string[] args)
         {
-
             var resultFromParsing = Parser.Default.ParseArguments<CommandLineOptions>(args);
             if (resultFromParsing.Tag != ParserResultType.Parsed)
                 return;
@@ -39,17 +38,18 @@ namespace cosmosdb_graph_test
             Console.WriteLine($"Warmup Period: {_warmupPeriod} ms");
             Task.Delay(_warmupPeriod).GetAwaiter().GetResult();
 
-            (_accountEndpoint, _accountKey, _apiKind, _database, _collection) = CommandLineUtils.ParseConnectionString(_unparsedConnectionString);
+            _cosmosDbConnectionString = CommandLineUtils.ParseCosmosDbConnectionString(_unparsedConnectionString);
 
-            if (CommandLineUtils.DoWeHaveAllParameters(_apiKind, _accountEndpoint, _accountKey, _database, _collection))
+            if (CommandLineUtils.AreCosmosDbParametersValid(_cosmosDbConnectionString))
             {
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var dataCreator = new DataCreator(new CosmosDBDatabase(), new BulkCosmosDBExecutor(), new SpecialRandom());
-                dataCreator.InitializeAsync(_accountEndpoint, _accountKey, _database, _collection).GetAwaiter().GetResult();
+                var dataCreator = new DataCreator(new CosmosDbDatabase(_cosmosDbConnectionString, _batchSize));
+                dataCreator.InitializeAsync().GetAwaiter().GetResult();
 
-                var totalElementsInserted = dataCreator.StartAsync(_rootNodeId, _batchSize, _numberOfNodesOnEachLevel, _numberOfTraversals).GetAwaiter().GetResult();
+                var totalElementsInserted = dataCreator.StartAsync(_rootNodeId, _numberOfNodesOnEachLevel, _numberOfTraversals)
+                    .GetAwaiter().GetResult();
 
                 stopwatch.Stop();
 
@@ -59,7 +59,6 @@ namespace cosmosdb_graph_test
             {
                 Console.WriteLine("Check the parameters");
             }
-
         }
     }
 }

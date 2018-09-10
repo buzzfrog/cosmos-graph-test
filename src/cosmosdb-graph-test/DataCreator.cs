@@ -1,79 +1,51 @@
-﻿using Microsoft.Azure.CosmosDB.BulkExecutor;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChanceNET;
 
 namespace cosmosdb_graph_test
 {
-    class DataCreator
+    public class DataCreator
     {
-        private static Chance _chance = new Chance();
+        private Chance _chance = new Chance();
         private IDatabase _database;
-        private IExecutor _executor;
-        private IDocumentClient _documentClient;
-        private IBulkExecutor _bulkExecutor;
-        private IRandom _random;
-        private string _rootNodeId;
-        private int _batchSize;
+
+        private Random _random = new Random();
+        private string _rootNodeId;        
         private int _numberOfNodesOnEachLevel;
         private int _numberOfTraversals;
-        private string _partitionKey;
-        private long _totalElements = 0;
-        private IList<object> _graphElementsToAdd = new List<object>();
 
-        public DataCreator(IDatabase database, IExecutor executor, IRandom random)
+        private long _totalGraphElements = 0;
+
+        public DataCreator(IDatabase database)
         {
             _database = database;
-            _executor = executor;
-            _random = random;
-
         }
 
-        public async Task InitializeAsync(string accountEndpoint, string accountKey, string database, string collection)
+        public async Task InitializeAsync()
         {
-            _documentClient = _database.Initialize(accountEndpoint, accountKey);
-
-            var documentCollections = _documentClient.CreateDocumentCollectionQuery(UriFactory.CreateDatabaseUri(database), null);
-            var documentCollection = documentCollections.Where(c => c.Id == collection).AsEnumerable().FirstOrDefault();
-
-            _partitionKey = documentCollection.PartitionKey.Paths.First().Replace("/", string.Empty);
-
-            // Set retry options high during initialization (default values).
-            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
-            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
-
-            _bulkExecutor = _executor.Initialize(_documentClient, documentCollection);
-
-            // Set retries to 0 to pass complete control to bulk executor.
-            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
-            _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
+            await _database.InitializeAsync();
         }
 
-        public async Task<long> StartAsync(string RootNodeIt, int BatchSize, int NumberOfNodesOnEachLevel, int NumberOfTraversals)
+        public async Task<long> StartAsync(string rootNodeId, int numberOfNodesOnEachLevel, int numberOfTraversals)
         {
-            _rootNodeId = RootNodeIt;
-            _batchSize = BatchSize;
-            _numberOfNodesOnEachLevel = NumberOfNodesOnEachLevel;
-            _numberOfTraversals = NumberOfTraversals;
+            _rootNodeId = rootNodeId;
+            _numberOfNodesOnEachLevel = numberOfNodesOnEachLevel;
+            _numberOfTraversals = numberOfTraversals;
 
             // Insert main hierarchy of nodes and edges as a tree
-            InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1).GetAwaiter().GetResult();
+            await InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1);
 
             // Add random edges to nodes
-            InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals).Wait();
+            await InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals);
 
             // Import remaining vertices and edges
-            BulkImportToCosmosDbAsync().Wait();
-
-            return _totalElements;
+            await _database.FlushAsync();
+            return _totalGraphElements;
         }
 
-        internal async Task InsertNodeAsync(string id, string parentId, string parentLabel, int level)
+        private async Task InsertNodeAsync(string id, string parentId, string parentLabel, int level)
         {
             var numberOfNodesToCreate = 0;
             var properties = new Dictionary<string, object>();
@@ -111,7 +83,6 @@ namespace cosmosdb_graph_test
                     break;
             }
 
-            properties.Add(_partitionKey, Utils.CreatePartitionKey(id));
             properties.Add("level", level);
             properties.Add("createdAt", DateTimeOffset.Now.ToUnixTimeMilliseconds());
             properties.Add("name", id);
@@ -120,13 +91,15 @@ namespace cosmosdb_graph_test
             var padding = new StringBuilder().Append('-', level).ToString();
             Console.WriteLine($"{padding} {id}");
 
-            var vertex = Utils.CreateGremlinVertex(id, label, properties);
-            await BulkInsertAsync(vertex);
+            var partitionKey = CreatePartitionKey(id);
+            _totalGraphElements++;
+            await _database.InsertVertexAsync(id, label, properties, partitionKey);
 
             if (parentId != string.Empty)
             {
-                var edge = Utils.CreateGremlinEdge("child", parentId, id, parentLabel, label);
-                await BulkInsertAsync(edge);
+                _totalGraphElements++;
+                await _database.InsertEdgeAsync("child", parentId, id, parentLabel, label, 
+                    CreatePartitionKey(parentId), partitionKey);                
             }
 
             for (var i = 0; i < numberOfNodesToCreate; i++)
@@ -135,41 +108,39 @@ namespace cosmosdb_graph_test
             }
         }
 
-        internal async Task BulkInsertAsync(object graphElement)
-        {
-            _totalElements++;
-            _graphElementsToAdd.Add(graphElement);
-            if (_graphElementsToAdd.Count >= _batchSize)
-            {
-                await BulkImportToCosmosDbAsync();
-            }
-        }
-
-        internal async Task BulkImportToCosmosDbAsync()
-        {
-            Console.WriteLine($"Graph elements inserted until now: {_totalElements}");
-
-            await _executor.BulkImportAsync(_graphElementsToAdd);
-
-            _graphElementsToAdd.Clear();
-        }
-
-        internal async Task InsertRandomEdgesAsync(string rootNodeId, int numberOfProcessToInsert)
+        private async Task InsertRandomEdgesAsync(string rootNodeId, int numberOfProcessToInsert)
         {
             for (int i = 0; i < numberOfProcessToInsert; i++)
             {
                 Console.WriteLine($"Inserting process {i} of {numberOfProcessToInsert}");
                 for (int j = 0; j < 10; j++)
                 {
-                    var sourceId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
-                    var destinationId = Utils.GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel, _random);
+                    var sourceId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    var destinationId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
 
-                    var edge = Utils.CreateGremlinEdge("process_" + i.ToString(), sourceId, destinationId, "asset", "asset", " - p_" + i.ToString() + "_" + j.ToString());
-                    await BulkInsertAsync(edge);
-
+                    _totalGraphElements++;
+                    await _database.InsertEdgeAsync("process_" + i.ToString(), sourceId, destinationId, 
+                        "asset", "asset", CreatePartitionKey(sourceId), CreatePartitionKey(destinationId), 
+                        " - p_" + i.ToString() + "_" + j.ToString());
                 }
             }
         }
 
+        public static string CreatePartitionKey(string id)
+        {
+            return id.Split('-')[0];
+        }
+
+        public string GenerateRandomId(string rootNodeId, int levelsInGraph, int numberOfNodesOnEachLevel)
+        {
+            var sb = new StringBuilder(rootNodeId);
+            var levelsIdShouldBeCreatedFor = _random.Next(levelsInGraph);
+            for (int i = 0; i < levelsIdShouldBeCreatedFor; i++)
+            {
+                sb.Append("-" + _random.Next(numberOfNodesOnEachLevel).ToString());
+            }
+
+            return sb.ToString();
+        }
     }
 }

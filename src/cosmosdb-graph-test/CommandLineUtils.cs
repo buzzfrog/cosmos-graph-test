@@ -1,33 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-
-namespace cosmosdb_graph_test
+﻿namespace cosmosdb_graph_test
 {
-    internal class CommandLineUtils
+    public class CommandLineUtils
     {
-        internal static string GetValueFromPart(string part)
+        public static string GetValueFromPart(string part)
         {
             return part.Split(new[] { '=' }, 2)[1];
         }
 
-        internal static string GetKeyFromPart(string part)
+        public static string GetKeyFromPart(string part)
         {
             return part.Split(new[] { '=' }, 2)[0];
         }
 
-        internal static bool DoWeHaveAllParameters(string _apiKind, string _accountEndpoint, string _accountKey, string _database, string _collection)
+        public static bool AreCosmosDbParametersValid((string accountEndpoint,
+                         string accountKey,
+                         string apiKind,
+                         string database,
+                         string collection) cosmosDbConnectionString)
         {
             // ApiKind needs to be Gremlin
-            if (_apiKind.ToLower() != "gremlin")
+            if (cosmosDbConnectionString.apiKind.ToLower() != "gremlin")
                 return false;
 
-            if (_accountEndpoint != string.Empty && _accountKey != string.Empty &&
-                _database != string.Empty && _collection != string.Empty)
+            if (cosmosDbConnectionString.accountEndpoint != string.Empty && cosmosDbConnectionString.accountKey != string.Empty &&
+                cosmosDbConnectionString.database != string.Empty && cosmosDbConnectionString.collection != string.Empty)
             {
                 return true;
             }
@@ -37,14 +33,14 @@ namespace cosmosdb_graph_test
             }
         }
 
-        internal static (string accountEndPoint, 
+        public static (string accountEndpoint, 
                          string accountKey, 
                          string apiKind, 
                          string database, 
-                         string collection) ParseConnectionString(string unparsedConnectionString)
+                         string collection) ParseCosmosDbConnectionString(string unparsedConnectionString)
         { 
 
-            string accountEndPoint = "";
+            string accountEndpoint = "";
             string accountKey = "";
             string apiKind = "";
             string database = "";
@@ -52,29 +48,29 @@ namespace cosmosdb_graph_test
         
             foreach (var part in unparsedConnectionString.Trim().Split(';'))
             {
-                switch (CommandLineUtils.GetKeyFromPart(part.ToLower()))
+                switch (GetKeyFromPart(part.ToLower()))
                 {
                     case "accountendpoint":
-                        accountEndPoint = CommandLineUtils.GetValueFromPart(part);
+                        accountEndpoint = GetValueFromPart(part);
                         break;
                     case "accountkey":
-                        accountKey = CommandLineUtils.GetValueFromPart(part);
+                        accountKey = GetValueFromPart(part);
                         break;
                     case "apikind":
-                        apiKind = CommandLineUtils.GetValueFromPart(part);
+                        apiKind = GetValueFromPart(part);
                         break;
                     case "database":
-                        database = CommandLineUtils.GetValueFromPart(part);
+                        database = GetValueFromPart(part);
                         break;
                     case "collection":
-                        collection = CommandLineUtils.GetValueFromPart(part);
+                        collection = GetValueFromPart(part);
                         break;
                     default:
                         break;
                 }
             }
 
-            return (accountEndPoint, accountKey, apiKind, database, collection);
+            return (accountEndpoint, accountKey, apiKind, database, collection);
         }
     }
 }
