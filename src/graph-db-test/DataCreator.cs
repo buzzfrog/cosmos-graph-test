@@ -10,11 +10,8 @@ namespace graph_db_test
     {
         private Chance _chance = new Chance();
         private IDatabase _database;
-
         private Random _random = new Random();
-        private string _rootNodeId;
         private int _numberOfNodesOnEachLevel;
-        private int _numberOfTraversals;
 
         private long _totalGraphElements = 0;
 
@@ -30,18 +27,17 @@ namespace graph_db_test
 
         public async Task<long> StartAsync(string rootNodeId, int numberOfNodesOnEachLevel, int numberOfTraversals)
         {
-            _rootNodeId = rootNodeId;
             _numberOfNodesOnEachLevel = numberOfNodesOnEachLevel;
-            _numberOfTraversals = numberOfTraversals;
 
             // Insert main hierarchy of nodes and edges as a tree
-            await InsertNodeAsync(_rootNodeId, string.Empty, string.Empty, 1);
+            await InsertNodeAsync(rootNodeId, string.Empty, string.Empty, 1);
 
             // Add random edges to nodes
-            await InsertRandomEdgesAsync(_rootNodeId, _numberOfTraversals);
+            await InsertRandomEdgesAsync(rootNodeId, numberOfTraversals);
 
             // Import remaining vertices and edges
             await _database.FlushAsync();
+
             return _totalGraphElements;
         }
 
@@ -88,6 +84,7 @@ namespace graph_db_test
             Console.WriteLine($"{padding} {id}");
 
             var partitionKey = CreatePartitionKey(id);
+
             _totalGraphElements++;
             await _database.InsertVertexAsync(id, label, mandatoryProperties, optionalProperties, partitionKey);
 
