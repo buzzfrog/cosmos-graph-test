@@ -12,7 +12,7 @@ namespace cosmosdb_graph_test
         private IDatabase _database;
 
         private Random _random = new Random();
-        private string _rootNodeId;        
+        private string _rootNodeId;
         private int _numberOfNodesOnEachLevel;
         private int _numberOfTraversals;
 
@@ -54,14 +54,13 @@ namespace cosmosdb_graph_test
             // NOTE: IF YOU MODIFIED VERTEX PROPERTIES, YOU MUST ADJUST THE SQL DB SCHEMA ACCORDINGLY!!!
             switch (level)
             {
-                case 1:
-                case 2:
-                case 3:
+                // level 1 to 4
+                case int i when i <= 4:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     break;
-                case 4:
+                // level 5 and 6
+                case int i when i >= 5 && i <= 6:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    //label = "asset";
                     optionalProperties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
@@ -69,19 +68,12 @@ namespace cosmosdb_graph_test
                         {"comments", _chance.Sentence(30)}
                     };
                     break;
-                case 5:
-                    numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    //label = "asset";
-                    optionalProperties = new Dictionary<string, object>() {
-                        {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
-                        {"installedAt", _chance.Timestamp()},
-                        {"serial", _chance.Guid().ToString()},
-                        {"comments", _chance.Sentence(30)}
-                    };
-                    break;
-                default:
-                    numberOfNodesToCreate = 0;
-                    break;
+            }
+
+            // check if leaf node, then no new nodes should be created
+            if (level == 6)
+            {
+                numberOfNodesToCreate = 0;
             }
 
             var mandatoryProperties = new Dictionary<string, object>
@@ -102,8 +94,8 @@ namespace cosmosdb_graph_test
             if (parentId != string.Empty)
             {
                 _totalGraphElements++;
-                await _database.InsertEdgeAsync("child", parentId, id, parentLabel, label, 
-                    CreatePartitionKey(parentId), partitionKey);                
+                await _database.InsertEdgeAsync("child", parentId, id, parentLabel, label,
+                    CreatePartitionKey(parentId), partitionKey);
             }
 
             for (var i = 0; i < numberOfNodesToCreate; i++)
@@ -123,8 +115,8 @@ namespace cosmosdb_graph_test
                     var destinationId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
 
                     _totalGraphElements++;
-                    await _database.InsertEdgeAsync("process_" + i.ToString(), sourceId, destinationId, 
-                        "asset", "asset", CreatePartitionKey(sourceId), CreatePartitionKey(destinationId), 
+                    await _database.InsertEdgeAsync("process_" + i.ToString(), sourceId, destinationId,
+                        "asset", "asset", CreatePartitionKey(sourceId), CreatePartitionKey(destinationId),
                         " - p_" + i.ToString() + "_" + j.ToString());
                 }
             }

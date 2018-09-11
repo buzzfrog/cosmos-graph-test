@@ -1,6 +1,9 @@
-﻿using cosmosdb_graph_test;
+using cosmosdb_graph_test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace cosmosdb_graph_test_tests
 {
@@ -29,6 +32,37 @@ namespace cosmosdb_graph_test_tests
             var result = _dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals).GetAwaiter().GetResult();
 
             Assert.AreEqual(result, 3729);
+        }
+
+        [TestMethod]
+        public void Verify_That_Six_Levels_Are_Created()
+        {
+            var rootNodeId = "1";
+            var numberOfNodesOnEachLevel = 4;
+            var numberOfTraversals = 100;
+
+            var vertices = new List<(Dictionary<string, object> mandatoryProperties, 
+                Dictionary<string, object> optionalProperties)>();
+
+            var dbMock = new Mock<IDatabase>();
+            dbMock.Setup(x => x.InsertVertexAsync(
+                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>(), 
+                    It.IsAny<Dictionary<string, object>>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask)
+                .Callback<string, string, Dictionary<string, object>, Dictionary<string, object>, string>
+                ((id, label, mandatoryProperties, optionalProperties, partitionKeyValue) => 
+                {
+                    vertices.Add((mandatoryProperties, optionalProperties));
+                });
+
+            _dataCreator = new DataCreator(dbMock.Object);
+            _dataCreator.InitializeAsync().GetAwaiter().GetResult();
+
+            var result = _dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals)
+                .GetAwaiter().GetResult();
+
+            var vertexOfLevel6 = vertices.First(x => (int)x.mandatoryProperties["level"] == 6);
+            Assert.IsTrue(vertexOfLevel6.optionalProperties.Any(x => x.Key == "manufacturer"));
         }
 
         [TestMethod]
