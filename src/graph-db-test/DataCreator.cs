@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChanceNET;
 
-namespace cosmosdb_graph_test
+namespace graph_db_test
 {
     public class DataCreator
     {

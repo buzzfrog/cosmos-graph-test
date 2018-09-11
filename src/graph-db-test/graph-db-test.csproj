@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
-    <RootNamespace>cosmosdb_graph_test</RootNamespace>
+    <RootNamespace>graph_db_test</RootNamespace>
+    <AssemblyName>graph-db-test</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

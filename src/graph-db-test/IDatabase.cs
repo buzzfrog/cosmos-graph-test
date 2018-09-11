@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace cosmosdb_graph_test
+namespace graph_db_test
 {
     public interface IDatabase
     {

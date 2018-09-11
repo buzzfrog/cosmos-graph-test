@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cosmosdb-graph-test-tests", "test\cosmosdb-graph-test-tests\cosmosdb-graph-test-tests.csproj", "{6B175494-A14D-4515-BFE0-1725C878FACA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graph-db-test-tests", "test\graph-db-test-tests\graph-db-test-tests.csproj", "{6B175494-A14D-4515-BFE0-1725C878FACA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cosmosdb-graph-test", "src\cosmosdb-graph-test\cosmosdb-graph-test.csproj", "{0160C22F-3594-46A2-9120-76196092F64E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graph-db-test", "src\graph-db-test\graph-db-test.csproj", "{0160C22F-3594-46A2-9120-76196092F64E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

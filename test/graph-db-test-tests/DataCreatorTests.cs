@@ -1,11 +1,11 @@
-using cosmosdb_graph_test;
+using graph_db_test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace cosmosdb_graph_test_tests
+namespace graph_db_test_tests
 {
     [TestClass]
     public class DataCreatorTests

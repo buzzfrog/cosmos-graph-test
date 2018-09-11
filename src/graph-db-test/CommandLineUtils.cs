@@ -1,4 +1,4 @@
-﻿namespace cosmosdb_graph_test
+﻿namespace graph_db_test
 {
     public enum GraphDbType
     {

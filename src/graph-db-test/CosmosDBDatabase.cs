@@ -6,7 +6,7 @@ using Microsoft.Azure.CosmosDB.BulkExecutor.Graph;
 using Microsoft.Azure.CosmosDB.BulkExecutor.Graph.Element;
 using Microsoft.Azure.Documents.Client;
 
-namespace cosmosdb_graph_test
+namespace graph_db_test
 {
     public class CosmosDbDatabase : IDatabase
     {

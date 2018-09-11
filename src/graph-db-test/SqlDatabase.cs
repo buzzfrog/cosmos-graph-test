@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace cosmosdb_graph_test
+namespace graph_db_test
 {
     public class SqlDatabase : IDatabase
     {

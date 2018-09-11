@@ -111,7 +111,7 @@ do
         --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "cosmosdb-graph-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS -w $WARMUP_PERIOD" &
+        --command-line "graph-db-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS -w $WARMUP_PERIOD" &
 done
 echo "Waiting until all containers are created"
 wait

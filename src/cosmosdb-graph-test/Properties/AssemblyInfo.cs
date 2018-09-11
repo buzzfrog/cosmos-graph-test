@@ -1,6 +1,0 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-[assembly: InternalsVisibleTo("cosmosdb-graph-test-tests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
