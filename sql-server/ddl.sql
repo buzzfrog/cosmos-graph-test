@@ -15,7 +15,7 @@ IF TYPE_ID('dbo.AssetType') IS NOT NULL
 GO
 
 IF OBJECT_ID('dbo.Child', 'U') IS NOT NULL 
-  DROP TABLE dbo.Child;
+	DROP TABLE dbo.Child;
 GO
 
 IF TYPE_ID('dbo.ChildType') IS NOT NULL
