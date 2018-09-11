@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using cosmosdb_graph_test;
 using Microsoft.Azure.CosmosDB.BulkExecutor;
 using Microsoft.Azure.CosmosDB.BulkExecutor.BulkImport;
+using Microsoft.Azure.CosmosDB.BulkExecutor.BulkUpdate;
+using Microsoft.Azure.CosmosDB.BulkExecutor.Graph.Element;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -76,6 +78,52 @@ namespace cosmosdb_graph_test_tests
             var result = _dataCreator.StartAsync(rootNodeId, batchSize, numberOfNodesOnEachLevel, numberOfTraversals).GetAwaiter().GetResult();
 
             Assert.AreEqual(result, 3729);
+        }
+
+        [TestMethod]
+        public void Verify_That_Six_Levels_Are_Created()
+        {
+            var rootNodeId = "1";
+            var batchSize = 100;
+            var numberOfNodesOnEachLevel = 4;
+            var numberOfTraversals = 100;
+
+            // override default construction
+            var fakeExecutor = new FakeExecutor();
+            _dataCreator = new DataCreator(_db.Object, fakeExecutor, _random.Object);
+
+            _dataCreator.InitializeAsync(null, null, _database, _collection).GetAwaiter().GetResult();
+
+            var result = _dataCreator.StartAsync(rootNodeId, batchSize, numberOfNodesOnEachLevel, numberOfTraversals).GetAwaiter().GetResult();
+
+            var vertex_of_level_6 = (GremlinVertex) (from v in fakeExecutor.Documents
+                                     where v is GremlinVertex && ((GremlinVertex)v).GetVertexProperties("level").Any(k => (int)k.Value == 6)
+                                     select v).First();
+
+            Assert.IsTrue(vertex_of_level_6.GetVertexProperties().Any(p => p.Key == "manufacturer"));
+
+            Assert.AreEqual(fakeExecutor.Documents.Count, 3729);
+        }
+
+    }
+
+
+    class FakeExecutor : IExecutor
+    {
+        public List<object> Documents =  new List<object>();
+
+        public Task BulkImportAsync(IEnumerable<object> documents)
+        {
+            foreach (var d in documents)
+            {
+                Documents.Add(d);
+            }
+            return Task.CompletedTask;
+        }
+
+        public IBulkExecutor Initialize(IDocumentClient database, DocumentCollection documentCollection)
+        {
+            return null;
         }
     }
 }

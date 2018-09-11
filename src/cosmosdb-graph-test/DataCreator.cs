@@ -81,14 +81,13 @@ namespace cosmosdb_graph_test
 
             switch (level)
             {
-                case 1:
-                case 2:
-                case 3:
+                // level 1 to 4
+                case int i when i <= 4:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     break;
-                case 4:
+                // level 5 and 6
+                case int i when i >= 5 && i <= 6:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    //label = "asset";
                     properties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
@@ -96,19 +95,12 @@ namespace cosmosdb_graph_test
                         {"comments", _chance.Sentence(30)}
                     };
                     break;
-                case 5:
-                    numberOfNodesToCreate = _numberOfNodesOnEachLevel;
-                    //label = "asset";
-                    properties = new Dictionary<string, object>() {
-                        {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
-                        {"installedAt", _chance.Timestamp()},
-                        {"serial", _chance.Guid().ToString()},
-                        {"comments", _chance.Sentence(30)}
-                    };
-                    break;
-                default:
-                    numberOfNodesToCreate = 0;
-                    break;
+            }
+
+            // check if leaf node, then no new nedes should be created
+            if(level == 6)
+            {
+                numberOfNodesToCreate = 0;
             }
 
             properties.Add(_partitionKey, Utils.CreatePartitionKey(id));
