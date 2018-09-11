@@ -1,7 +1,6 @@
 ﻿using CommandLine;
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace graph_db_test
 {
@@ -20,25 +19,20 @@ namespace graph_db_test
             var batchSize = result.Value.BatchSize;
             var numberOfNodesOnEachLevel = result.Value.NumberOfNodesOnEachLevel;
             var numberOfTraversals = result.Value.NumberOfTraversalsToAdd;
-            var warmupPeriod = result.Value.WarmupPeriod;
-
-            Console.WriteLine($"Warmup Period: {warmupPeriod} ms");
-            Task.Delay(warmupPeriod).GetAwaiter().GetResult();
 
             var database = CreateDatabase(unparsedConnectionString, batchSize);
+            var dataCreator = new DataCreator(database);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-
-            var dataCreator = new DataCreator(database);
+            
             dataCreator.InitializeAsync().GetAwaiter().GetResult();
-
-            var totalElementsInserted = dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals)
+            var totalGraphElements = dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals)
                 .GetAwaiter().GetResult();
 
             stopwatch.Stop();
 
-            Console.WriteLine($"Added {totalElementsInserted} graph elements in {stopwatch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Inserted {totalGraphElements} graph elements in {stopwatch.ElapsedMilliseconds} ms");
         }
 
         private static IDatabase CreateDatabase(string unparsedConnectionString, int batchSize)

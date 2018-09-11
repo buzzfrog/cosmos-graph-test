@@ -7,7 +7,7 @@ IF OBJECT_ID('dbo.Asset', 'U') IS NOT NULL
 GO
 
 IF OBJECT_ID('dbo.usp_InsertGraphElements', 'P') IS NOT NULL
-	DROP PROCEDURE usp_InsertGraphElements
+	DROP PROC dbo.usp_InsertGraphElements
 GO
 
 IF TYPE_ID('dbo.AssetType') IS NOT NULL
