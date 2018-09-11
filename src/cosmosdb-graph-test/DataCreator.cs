@@ -48,9 +48,10 @@ namespace cosmosdb_graph_test
         private async Task InsertNodeAsync(string id, string parentId, string parentLabel, int level)
         {
             var numberOfNodesToCreate = 0;
-            var properties = new Dictionary<string, object>();
+            var optionalProperties = new Dictionary<string, object>();
             var label = "asset";
 
+            // NOTE: IF YOU MODIFIED VERTEX PROPERTIES, YOU MUST ADJUST THE SQL DB SCHEMA ACCORDINGLY!!!
             switch (level)
             {
                 case 1:
@@ -61,7 +62,7 @@ namespace cosmosdb_graph_test
                 case 4:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     //label = "asset";
-                    properties = new Dictionary<string, object>() {
+                    optionalProperties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
                         {"serial", _chance.Guid().ToString()},
@@ -71,7 +72,7 @@ namespace cosmosdb_graph_test
                 case 5:
                     numberOfNodesToCreate = _numberOfNodesOnEachLevel;
                     //label = "asset";
-                    properties = new Dictionary<string, object>() {
+                    optionalProperties = new Dictionary<string, object>() {
                         {"manufacturer", _chance.PickOne(new string[] {"fiemens", "babb", "vortex", "mulvo", "ropert"})},
                         {"installedAt", _chance.Timestamp()},
                         {"serial", _chance.Guid().ToString()},
@@ -83,17 +84,20 @@ namespace cosmosdb_graph_test
                     break;
             }
 
-            properties.Add("level", level);
-            properties.Add("createdAt", DateTimeOffset.Now.ToUnixTimeMilliseconds());
-            properties.Add("name", id);
-            properties.Add("parentId", parentId);
+            var mandatoryProperties = new Dictionary<string, object>
+            {
+                { "level", level },
+                { "createdAt", DateTimeOffset.Now.ToUnixTimeMilliseconds() },
+                { "name", id },
+                { "parentId", parentId }
+            };
 
             var padding = new StringBuilder().Append('-', level).ToString();
             Console.WriteLine($"{padding} {id}");
 
             var partitionKey = CreatePartitionKey(id);
             _totalGraphElements++;
-            await _database.InsertVertexAsync(id, label, properties, partitionKey);
+            await _database.InsertVertexAsync(id, label, mandatoryProperties, optionalProperties, partitionKey);
 
             if (parentId != string.Empty)
             {

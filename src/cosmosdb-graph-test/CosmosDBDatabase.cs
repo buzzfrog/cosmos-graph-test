@@ -65,11 +65,17 @@ namespace cosmosdb_graph_test
         }
 
         public async Task InsertVertexAsync(string id, string label,
-            Dictionary<string, object> properties, string partitionKeyValue = "")
+            Dictionary<string, object> mandatoryProperties, 
+            Dictionary<string, object> optionalProperties, string partitionKeyValue = "")
         {
             var vertex = new GremlinVertex(id, label);
 
-            foreach (var property in properties)
+            foreach (var property in mandatoryProperties)
+            {
+                vertex.AddProperty(property.Key, property.Value);
+            }
+
+            foreach (var property in optionalProperties)
             {
                 vertex.AddProperty(property.Key, property.Value);
             }

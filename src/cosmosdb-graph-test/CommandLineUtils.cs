@@ -1,5 +1,10 @@
 ﻿namespace cosmosdb_graph_test
 {
+    public enum GraphDbType
+    {
+        CosmosDb, SqlServer, Unknown
+    }
+
     public class CommandLineUtils
     {
         public static string GetValueFromPart(string part)
@@ -10,6 +15,20 @@
         public static string GetKeyFromPart(string part)
         {
             return part.Split(new[] { '=' }, 2)[0];
+        }
+
+        public static GraphDbType ParseGraphDbType(string connectionString)
+        {
+            if (connectionString.Contains("ApiKind=Gremlin"))
+            {
+                return GraphDbType.CosmosDb;
+            }
+            else if (connectionString.Contains("Initial Catalog="))
+            {
+                return GraphDbType.SqlServer;
+            }
+
+            return GraphDbType.Unknown;
         }
 
         public static bool AreCosmosDbParametersValid((string accountEndpoint,

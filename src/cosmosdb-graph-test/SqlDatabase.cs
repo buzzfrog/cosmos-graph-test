@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -9,7 +10,6 @@ namespace cosmosdb_graph_test
     {
         private string _connectionString;
         private SqlConnection _sqlConnection;
-        private SqlBulkCopy _sqlBulkCopy;
 
         private int _batchSize;
 
@@ -26,12 +26,37 @@ namespace cosmosdb_graph_test
         {
             _sqlConnection = new SqlConnection(_connectionString);
             await _sqlConnection.OpenAsync();
-            _sqlBulkCopy = new SqlBulkCopy(_sqlConnection);
+
+            FillSchema(_nodes, "AssetType");
+            FillSchema(_edges, "ChildType");
         }
 
-        public async Task InsertVertexAsync(string id, string label, Dictionary<string, object> properties, 
-            string partitionKeyValue = "")
+        private void FillSchema(DataTable table, string typeName)
         {
+            var adapter = new SqlDataAdapter($"DECLARE @tableType dbo.{typeName} SELECT * FROM @tableType", _sqlConnection);
+            adapter.FillSchema(table, SchemaType.Source);
+        }
+
+        public async Task InsertVertexAsync(string id, string label,
+            Dictionary<string, object> mandatoryProperties,
+            Dictionary<string, object> optionalProperties, string partitionKeyValue = "")
+        {
+            var row = _nodes.NewRow();
+            row["Id"] = id;
+            row["partitionKey"] = partitionKeyValue;
+
+            foreach (var property in mandatoryProperties)
+            {
+                row[property.Key] = property.Value;
+            }
+
+            if (optionalProperties.Count > 0)
+            {
+                row["propertiesJson"] = JsonConvert.SerializeObject(optionalProperties);
+            }
+
+            _nodes.Rows.Add(row);
+
             await FlushIfNeededAsync();
         }
 
@@ -56,13 +81,26 @@ namespace cosmosdb_graph_test
 
         public async Task FlushAsync()
         {
-            _sqlBulkCopy.DestinationTableName = "Asset";
-            await _sqlBulkCopy.WriteToServerAsync(_nodes);
-            _nodes.Clear();
+            using (var transaction = _sqlConnection.BeginTransaction())
+            {
+                var insertCommand = new SqlCommand("usp_InsertGraphElements", _sqlConnection, transaction)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
-            //Replace with SP
-            //await _sqlBulkCopy.WriteToServerAsync(_edges);
-            _edges.Clear();
+                var tvpAssetType = insertCommand.Parameters.AddWithValue("@tvpAssetType", _nodes);
+                tvpAssetType.SqlDbType = SqlDbType.Structured;
+
+                var tvpChildType = insertCommand.Parameters.AddWithValue("@tvpChildType", _edges);
+                tvpChildType.SqlDbType = SqlDbType.Structured;
+
+                await insertCommand.ExecuteNonQueryAsync();
+
+                _nodes.Clear();
+                _edges.Clear();
+
+                transaction.Commit();
+            }            
         }
     }
 }
