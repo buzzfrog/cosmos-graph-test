@@ -95,7 +95,7 @@ ACR_IMAGE="$ACR_SERVER/$IMAGE_NAME:$IMAGE_TAG"
 IMAGE_EXISTS=$(az acr repository list -n $ACR_NAME --query "[].contains(@, '$IMAGE_NAME')" -o tsv)
 
 if [[ "$REBUILD_IMAGE" = true || "$IMAGE_EXISTS" != true ]]; then
-    az acr build --registry $ACR_NAME --image $ACR_IMAGE --os windows .
+    az acr build --registry $ACR_NAME --image $ACR_IMAGE --os windows --timeout 6000 .
 fi
 
 ACR_USERNAME=$(az acr credential show -n $ACR_NAME --query username -o tsv)
