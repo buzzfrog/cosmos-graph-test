@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace graph_db_test
 {
@@ -19,6 +20,10 @@ namespace graph_db_test
             var batchSize = result.Value.BatchSize;
             var numberOfNodesOnEachLevel = result.Value.NumberOfNodesOnEachLevel;
             var numberOfTraversals = result.Value.NumberOfTraversalsToAdd;
+            var warmupPeriod = result.Value.WarmupPeriod;
+
+            Console.WriteLine($"Warmup Period: {warmupPeriod} ms");
+            Task.Delay(warmupPeriod).GetAwaiter().GetResult();
 
             var database = CreateDatabase(unparsedConnectionString, batchSize);
             var dataCreator = new DataCreator(database);

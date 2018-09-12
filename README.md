@@ -40,7 +40,7 @@ OR
 ```
 -a 200000
 ```
-- Warmup period before the program starts in ms. (This is mainly used in ACI where we sometime needs to wait for network access.)
+- Warmup period (in ms) before the program starts. (This is mainly used in ACI where we sometimes need to wait for network access)
 ```
 -w 30000
 ```
