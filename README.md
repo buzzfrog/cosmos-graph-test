@@ -40,6 +40,10 @@ OR
 ```
 -a 200000
 ```
+- Warmup period before the program starts in ms. (This is mainly used in ACI where we sometime needs to wait for network access.)
+```
+-w 30000
+```
 
 ## Cosmos DB Scale Out
 
