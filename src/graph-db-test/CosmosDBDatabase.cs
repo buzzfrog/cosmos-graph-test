@@ -58,6 +58,7 @@ namespace graph_db_test
             _documentClient.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
 
             _graphBulkExecutor = new GraphBulkExecutor(_documentClient, documentCollection);
+            _graphBulkExecutor.InitializeAsync().GetAwaiter().GetResult();
 
             // Set retries to 0 to pass complete control to bulk executor.
             _documentClient.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
