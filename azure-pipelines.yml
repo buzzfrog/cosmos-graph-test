@@ -35,5 +35,8 @@ steps:
     azureSubscription: 'azure-connection2'
     scriptLocation: scriptPath
     scriptPath: ./build-pipeline/create-azure-resources.bat
-    arguments: graph-db-test-build-pipeline kalle3anka
+    arguments: $(resource_group_name) $(cosmos_db_name)
 
+- task: BatchScript@1
+  inputs:
+    filename: ./build-pipeline/run-graph-db-test.bat

@@ -1,0 +1,4 @@
+SETLOCAL EnableDelayedExpansion
+
+ECHO %COSMOSDB_KEY%
+ECHO 
