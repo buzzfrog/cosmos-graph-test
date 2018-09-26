@@ -24,6 +24,12 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: AzureCLI@1
+  inputs:
+    azureSubcription: '$(azure_connection)'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
+  
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
