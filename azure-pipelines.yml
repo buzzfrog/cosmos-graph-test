@@ -17,6 +17,7 @@ steps:
     azureSubscription: 'azure-connection2'
     scriptLocation: 'inlineScript'
     inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
+    
 - task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
