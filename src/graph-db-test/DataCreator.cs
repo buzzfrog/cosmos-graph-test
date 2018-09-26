@@ -33,7 +33,7 @@ namespace graph_db_test
             await InsertNodeAsync(rootNodeId, string.Empty, string.Empty, 1);
 
             // Add random edges to nodes
-            await InsertRandomEdgesAsync(rootNodeId, numberOfTraversals);
+            await InsertVertexThatConnectsToOtherVertexesAsync(rootNodeId, numberOfTraversals);
 
             // Import remaining vertices and edges
             await _database.FlushAsync();
@@ -101,20 +101,27 @@ namespace graph_db_test
             }
         }
 
-        private async Task InsertRandomEdgesAsync(string rootNodeId, int numberOfProcessToInsert)
+        private async Task InsertVertexThatConnectsToOtherVertexesAsync(string rootNodeId, int numberOfVertexesToInsert)
         {
-            for (int i = 0; i < numberOfProcessToInsert; i++)
+            for (int i = 0; i < numberOfVertexesToInsert; i++)
             {
-                Console.WriteLine($"Inserting process {i} of {numberOfProcessToInsert}");
-                for (int j = 0; j < 10; j++)
+                await _database.InsertVertexAsync($"document-{i}", "document", new Dictionary<string, object>(), new Dictionary<string, object>(), rootNodeId);
+
+                Console.WriteLine($"Inserting document {i} of {numberOfVertexesToInsert}");
+
+                var nodesToAttachToDocumentNode = new List<string>();
+                for (int j = 0; j < 500; j++)
                 {
-                    var sourceId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
-                    var destinationId = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    string id;
+                    do
+                    {
+                        id = GenerateRandomId(rootNodeId, 5, _numberOfNodesOnEachLevel);
+                    } while (nodesToAttachToDocumentNode.Contains(id));
+                    nodesToAttachToDocumentNode.Add(id);
+
+                    await _database.InsertEdgeAsync($"tags-in-document", $"document-{i}", id, "document", "asset", rootNodeId, rootNodeId);
 
                     _totalGraphElements++;
-                    await _database.InsertEdgeAsync("process_" + i.ToString(), sourceId, destinationId,
-                        "asset", "asset", CreatePartitionKey(sourceId), CreatePartitionKey(destinationId),
-                        " - p_" + i.ToString() + "_" + j.ToString());
                 }
             }
         }
