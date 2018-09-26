@@ -11,13 +11,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-steps:
-- task: AzureCLI@1
-  inputs:
-    azureSubscription: 'azure-connection2'
-    scriptLocation: 'inlineScript'
-    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
-    
+steps:    
 - task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
@@ -34,3 +28,12 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: AzureCLI@1
+  displayName: 'AZ Create CosmosDB '
+  inputs:
+    azureSubscription: 'azure-connection2'
+    scriptLocation: scriptPath
+    scriptPath: ./build-pipeline/create-azure-resources.bat
+    arguments: graph-db-test-build-pipeline kalle3anka
+
