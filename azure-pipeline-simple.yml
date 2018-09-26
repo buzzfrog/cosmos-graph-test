@@ -7,6 +7,6 @@ steps:
   inputs:
     azureSubscription: 'azure-connection2'
     scriptLocation: inlineScript
-    inlineScript: 'az cosmosdb create -g ''graph-db-test-build-pipeline -n 'kalle2anka' --capabilities EnableGremlin'
+    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
 
 
