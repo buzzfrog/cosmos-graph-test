@@ -1,13 +1,12 @@
-queue:
-  name: Hosted VS2017
+pool:
+    vmImage: 'VS2017-Win2016'
+    
 steps:
 - task: AzureCLI@1
   displayName: 'Azure CLI '
   inputs:
     azureSubscription: 'azure-connection2'
-
     scriptLocation: inlineScript
-
     inlineScript: 'az cosmosdb create -g ''graph-db-test-build-pipeline -n 'kalle2anka' --capabilities EnableGremlin'
 
 
