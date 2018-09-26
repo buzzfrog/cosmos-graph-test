@@ -12,3 +12,5 @@ call az cosmosdb collection create -g %RESOURCE_GROUP_NAME% -n %COSMOSDB_ACCOUNT
         --throughput 10000 --partition-key-path "/partitionId"
 
 FOR /F "usebackq" %%i IN (`az cosmosdb list-keys -g %RESOURCE_GROUP_NAME% -n %COSMOSDB_ACCOUNT_NAME% --query primaryMasterKey -o tsv`) DO SET COSMOSDB_KEY=%%i
+
+@echo ##vso[task.setvariable variable=cosmos_db_key]%COSMOSDB_KEY%
