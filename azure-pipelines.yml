@@ -12,6 +12,11 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: AzureCLI@1
+  inputs:
+    azureSubcription: 'azure-connection)'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
 - task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
@@ -23,12 +28,6 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
-- task: AzureCLI@1
-  inputs:
-    azureSubcription: '$(azure_connection)'
-    scriptLocation: 'inlineScript'
-    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
   
 - task: VSTest@2
   inputs:
