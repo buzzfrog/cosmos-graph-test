@@ -6,7 +6,6 @@ steps:
   displayName: 'Azure CLI '
   inputs:
     azureSubscription: 'azure-connection2'
-    scriptLocation: inlineScript
-    inlineScript: 'az cosmosdb create -g graph-db-test-build-pipeline -n kalle2anka --capabilities EnableGremlin'
-
+    scriptLocation: scriptPath
+    scriptPath: ./build-pipeline/create-azure-resources.bat
 
