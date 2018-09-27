@@ -45,6 +45,6 @@ steps:
 - task: AzureCLI@1
   displayName: 'AZ Delete CosmosDB '
   inputs:
-    azureSubscription: 'azure-connection2'
+    azureSubscription: 'azure-connection3'
     scriptLocation: inlineScript
     inlineScript: az cosmosdb delete --resource-group $(resource_group_name) --name $(cosmos_db_name)
