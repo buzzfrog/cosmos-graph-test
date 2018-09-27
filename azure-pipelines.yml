@@ -47,7 +47,6 @@ task: VSTest@2
     testAssemblyVer2: '**\graph-db-test-functional-test.dll'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-    overrideTestrunParameters: '-cosmosdbname $(cosmos_db_name) -key $(cosmos_db_key)'
 
 - task: AzureCLI@1
   displayName: 'AZ Delete CosmosDB '
