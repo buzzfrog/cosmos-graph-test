@@ -29,13 +29,13 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: AzureCLI@1
-  displayName: 'AZ Create CosmosDB '
-  inputs:
-    azureSubscription: 'azure-connection2'
-    scriptLocation: scriptPath
-    scriptPath: ./build-pipeline/create-azure-resources.bat
-    arguments: $(resource_group_name) $(cosmos_db_name)
+#- task: AzureCLI@1
+#  displayName: 'AZ Create CosmosDB '
+#  inputs:
+#    azureSubscription: 'azure-connection2'
+#    scriptLocation: scriptPath
+#    scriptPath: ./build-pipeline/create-azure-resources.bat
+#    arguments: $(resource_group_name) $(cosmos_db_name)
 
 - task: BatchScript@1
   inputs:
