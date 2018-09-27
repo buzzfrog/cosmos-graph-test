@@ -33,7 +33,7 @@ steps:
 - task: AzureCLI@1
   displayName: 'AZ Create CosmosDB '
   inputs:
-    azureSubscription: 'azure-connection2'
+    azureSubscription: '$(azure_connection)'
     scriptLocation: scriptPath
     scriptPath: ./build-pipeline/create-azure-resources.bat
     arguments: $(resource_group_name) $(cosmos_db_name)
@@ -45,6 +45,6 @@ steps:
 - task: AzureCLI@1
   displayName: 'AZ Delete CosmosDB '
   inputs:
-    azureSubscription: 'azure-connection3'
+    azureSubscription: '$(azure_connection)'
     scriptLocation: inlineScript
     inlineScript: az cosmosdb delete --resource-group $(resource_group_name) --name $(cosmos_db_name)
