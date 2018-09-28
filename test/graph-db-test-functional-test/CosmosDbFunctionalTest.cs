@@ -14,7 +14,7 @@ namespace graph_db_test_functional_test
             var cosmosDbName = Environment.GetEnvironmentVariable("COSMOS_DB_NAME");
             var cosmosDbKey = Environment.GetEnvironmentVariable("COSMOS_DB_KEY");
 
-            Console.WriteLine($"N: {cosmosDbName} K: {cosmosDbKey}");
+            Assert.AreEqual("cos-test-build-8977", cosmosDbName);
 
         }
     }
