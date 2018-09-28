@@ -1,6 +1,7 @@
 ﻿using System;
-using Gremlin.Net.Driver;
-using Gremlin.Net.Structure.IO.GraphSON;
+using System.Linq;
+using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.Documents.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace graph_db_test_functional_test
@@ -22,16 +23,22 @@ namespace graph_db_test_functional_test
             }
             else
             {
-                var gremlinServer = new GremlinServer($"{cosmosDbName}.gremlin.cosmosdb.azure.com", 443, enableSsl: true,
-                                            username: "/dbs/dbtest/colls/coltest",
-                                            password: cosmosDbKey);
-
-                using (var gremlinClient = new GremlinClient(gremlinServer, new GraphSON2Reader(), new GraphSON2Writer(), GremlinClient.GraphSON2MimeType))
+                var connectionPolicy = new ConnectionPolicy
                 {
-                    var result = gremlinClient.SubmitAsync<int>("g.v().count()").GetAwaiter().GetResult();
-                    Assert.AreEqual(3906, result);
-                }
+                    ConnectionMode = ConnectionMode.Direct,
+                    ConnectionProtocol = Protocol.Tcp
+                };
 
+                FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, PartitionKey = new Microsoft.Azure.Documents.PartitionKey("1") };
+
+                var documentClient = new DocumentClient(new Uri($"https://{cosmosDbName}.documents.azure.com:443"),
+                    cosmosDbKey, connectionPolicy);
+
+                var result = documentClient.CreateDocumentQuery(
+                    UriFactory.CreateDocumentCollectionUri("dbtest", "coltest"),
+                    "SELECT VALUE COUNT(c.id) FROM c WHERE c.partitionId = '1'", queryOptions).ToList();
+
+                Assert.AreEqual(8811, result[0].Value);
                 Assert.AreEqual("cos-test-build-8977", cosmosDbName);
             }
 
