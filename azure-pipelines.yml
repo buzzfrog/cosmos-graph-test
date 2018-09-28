@@ -54,3 +54,4 @@ steps:
     azureSubscription: '$(azure_connection)'
     scriptLocation: inlineScript
     inlineScript: az cosmosdb delete --resource-group $(resource_group_name) --name $(cosmos_db_name)
+  condition: always()
