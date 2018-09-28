@@ -28,7 +28,7 @@ namespace graph_db_test_functional_test
 
                 using (var gremlinClient = new GremlinClient(gremlinServer, new GraphSON2Reader(), new GraphSON2Writer(), GremlinClient.GraphSON2MimeType))
                 {
-                    var result = gremlinClient.SubmitAsync<int>("g.v().count()");
+                    var result = gremlinClient.SubmitAsync<int>("g.v().count()").GetAwaiter().GetResult();
                     Assert.AreEqual(8778, result);
                 }
 
