@@ -39,7 +39,6 @@ namespace graph_db_test_functional_test
                     "SELECT VALUE COUNT(c.id) FROM c WHERE c.partitionId = '1'", queryOptions).ToList();
 
                 Assert.AreEqual(57911, result[0].Value);
-                Assert.AreEqual("cos-test-build-8977", cosmosDbName);
             }
 
         }
