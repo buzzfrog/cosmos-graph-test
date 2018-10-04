@@ -14,8 +14,7 @@ namespace graph_db_test_functional_test
         public void DoDatabaseCheck()
         {
 
-            var cosmosDbName = Environment.GetEnvironmentVariable("COSMOS_DB_NAME");
-            var cosmosDbKey = Environment.GetEnvironmentVariable("COSMOS_DB_KEY");
+            var cosmosDbKey = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
             if (cosmosDbKey == null)
             {
@@ -31,7 +30,7 @@ namespace graph_db_test_functional_test
 
                 FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, PartitionKey = new Microsoft.Azure.Documents.PartitionKey("1") };
 
-                var documentClient = new DocumentClient(new Uri($"https://{cosmosDbName}.documents.azure.com:443"),
+                var documentClient = new DocumentClient(new Uri("https://localhost:8081"),
                     cosmosDbKey, connectionPolicy);
 
                 var result = documentClient.CreateDocumentQuery(
@@ -39,7 +38,6 @@ namespace graph_db_test_functional_test
                     "SELECT VALUE COUNT(c.id) FROM c WHERE c.partitionId = '1'", queryOptions).ToList();
 
                 Assert.AreEqual(8811, result[0].Value);
-                Assert.AreEqual("cos-test-build-8977", cosmosDbName);
             }
 
         }
