@@ -30,13 +30,10 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: AzureCLI@1
-  displayName: 'AZ Create CosmosDB '
+- task: PowerShell@2
   inputs:
-    azureSubscription: '$(azure_connection)'
-    scriptLocation: scriptPath
-    scriptPath: ./build-pipeline/create-azure-resources.bat
-    arguments: $(resource_group_name) $(cosmos_db_name)
+    targetType: inline
+    script: Install-Module -Name CosmosDB -Force; $cosmosDbContext = New-CosmosDbContext -Emulator -Database 'db001'; New-CosmosDbDatabase -Context $cosmosDbContext -Id 'db001'; New-CosmosDbCollection -Context $cosmosDbContext -Id 'col001' -PartitionKey 'partitionId' -OfferThroughput 50000 
 
 - task: BatchScript@1
   inputs:
@@ -48,10 +45,3 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: AzureCLI@1
-  displayName: 'AZ Delete CosmosDB '
-  inputs:
-    azureSubscription: '$(azure_connection)'
-    scriptLocation: inlineScript
-    inlineScript: az cosmosdb delete --resource-group $(resource_group_name) --name $(cosmos_db_name)
-  condition: always()
