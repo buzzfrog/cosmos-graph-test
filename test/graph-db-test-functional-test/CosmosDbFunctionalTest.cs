@@ -37,7 +37,7 @@ namespace graph_db_test_functional_test
                     UriFactory.CreateDocumentCollectionUri("dbtest", "coltest"),
                     "SELECT VALUE COUNT(c.id) FROM c WHERE c.partitionId = '1'", queryOptions).ToList();
 
-                Assert.AreEqual(8811, result[0].Value);
+                Assert.AreEqual(57911, result[0].Value);
             }
 
         }

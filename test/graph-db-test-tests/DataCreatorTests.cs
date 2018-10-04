@@ -21,25 +21,25 @@ namespace graph_db_test_tests
         }
 
         [TestMethod]
-        public void Start_And_Insert_XXX_documents()
+        public void Start_And_Insert_23661_documents()
         {
             var rootNodeId = "1";
-            var numberOfNodesOnEachLevel = 4;
-            var numberOfTraversals = 100;
+            var numberOfNodesOnEachLevel = 6;
+            var numberOfTraversals = 10;
 
             _dataCreator.InitializeAsync().GetAwaiter().GetResult();
 
             var result = _dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals).GetAwaiter().GetResult();
 
-            Assert.AreEqual(result, 3729);
+            Assert.AreEqual(23661, result);
         }
 
         [TestMethod]
         public void Verify_That_Six_Levels_Are_Created()
         {
             var rootNodeId = "1";
-            var numberOfNodesOnEachLevel = 4;
-            var numberOfTraversals = 100;
+            var numberOfNodesOnEachLevel = 6;
+            var numberOfTraversals = 1;
 
             var vertices = new List<(Dictionary<string, object> mandatoryProperties, 
                 Dictionary<string, object> optionalProperties)>();
