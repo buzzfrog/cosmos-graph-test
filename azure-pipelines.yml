@@ -32,8 +32,8 @@ steps:
 
 - task: PowerShell@2
   inputs:
-    targetType: inline
-    script: Install-Module -Name CosmosDB -Force; $cosmosDbContext = New-CosmosDbContext -Emulator -Database 'db001'; New-CosmosDbDatabase -Context $cosmosDbContext -Id 'db001'; New-CosmosDbCollection -Context $cosmosDbContext -Id 'col001' -PartitionKey 'partitionId' -OfferThroughput 50000 
+    targetType: filePath
+    filePath: ./build-pipeline/create-cosmosdb-emulator.ps1
 
 - task: BatchScript@1
   inputs:
