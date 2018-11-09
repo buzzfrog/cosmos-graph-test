@@ -7,7 +7,7 @@ namespace graph_db_test
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var resultFromParsing = Parser.Default.ParseArguments<CommandLineOptions>(args);
             if (resultFromParsing.Tag != ParserResultType.Parsed)
@@ -23,7 +23,7 @@ namespace graph_db_test
             var warmupPeriod = result.Value.WarmupPeriod;
 
             Console.WriteLine($"Warmup Period: {warmupPeriod} ms");
-            Task.Delay(warmupPeriod).GetAwaiter().GetResult();
+            await Task.Delay(warmupPeriod);
 
             var database = CreateDatabase(unparsedConnectionString, batchSize);
             var dataCreator = new DataCreator(database);
@@ -31,9 +31,8 @@ namespace graph_db_test
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             
-            dataCreator.InitializeAsync().GetAwaiter().GetResult();
-            var totalGraphElements = dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals)
-                .GetAwaiter().GetResult();
+            await dataCreator.InitializeAsync();
+            var totalGraphElements = await dataCreator.StartAsync(rootNodeId, numberOfNodesOnEachLevel, numberOfTraversals);
 
             stopwatch.Stop();
 

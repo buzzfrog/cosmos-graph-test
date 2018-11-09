@@ -14,9 +14,10 @@ REBUILD_IMAGE=${6:-false}
 
 RU_THROUGHPUT=100000
 
-# One Cosmos DB partition is 10GB or 10k RUs. Total Container Instances shouldn't exceed 20.
+# One Cosmos DB partition is 10GB or 10k RUs. Total Container Instances should be 1-100.
 INSTANCES=$((RU_THROUGHPUT/10000))
-INSTANCES=$(($INSTANCES>20?20:$INSTANCES))
+INSTANCES=$(($INSTANCES<1?1:$INSTANCES))
+INSTANCES=$(($INSTANCES>100?100:$INSTANCES))
 
 PARTITION_KEY="partitionId"
 BATCH_SIZE=5000
@@ -36,7 +37,7 @@ az container list -g $RESOURCE_GROUP --query "[?starts_with(name, '$IMAGE_NAME')
 do
     az container delete -g $RESOURCE_GROUP -n $container -y &
 done
-echo "Waiting on the deletion of old containers"
+echo "Waiting for old containers to be deleted"
 wait
 echo "All old containers are deleted"
 
@@ -95,7 +96,7 @@ ACR_IMAGE="$ACR_SERVER/$IMAGE_NAME:$IMAGE_TAG"
 IMAGE_EXISTS=$(az acr repository list -n $ACR_NAME --query "[].contains(@, '$IMAGE_NAME')" -o tsv)
 
 if [[ "$REBUILD_IMAGE" = true || "$IMAGE_EXISTS" != true ]]; then
-    az acr build --registry $ACR_NAME --image $ACR_IMAGE --os windows --timeout 6000 .
+    az acr build --registry $ACR_NAME --image $ACR_IMAGE --timeout 6000 .
 fi
 
 ACR_USERNAME=$(az acr credential show -n $ACR_NAME --query username -o tsv)
@@ -108,10 +109,10 @@ echo "Creating new containers"
 for (( i=0; i<$INSTANCES; i++ ))
 do
     az container create -g $RESOURCE_GROUP -n "$IMAGE_NAME$i" --image $ACR_IMAGE \
-        --restart-policy Never --os-type Windows --cpu 4 --memory 14 \
+        --restart-policy Never --cpu 4 --memory 14 \
         --registry-login-server $ACR_SERVER \
         --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD \
-        --command-line "graph-db-test.exe -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS -w $WARMUP_PERIOD" &
+        --command-line "dotnet graph-db-test.dll -b $BATCH_SIZE -r $i -c $CONNECTION_STRING -n $NODES_ON_EACH_LEVEL -a $ADDITIONAL_TRAVERSALS -w $WARMUP_PERIOD" &
 done
-echo "Waiting until all containers are created"
+echo "Waiting for all containers to be created"
 wait

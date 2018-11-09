@@ -2,21 +2,25 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>graph_db_test</RootNamespace>
     <AssemblyName>graph-db-test</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Chance.NET" Version="2.0.0" />
+    <PackageReference Include="Chance.NET" Version="2.1.0" />
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
-    <PackageReference Include="Microsoft.Azure.CosmosDB.BulkExecutor" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.0.0-preview2" />
+    <PackageReference Include="Microsoft.Azure.CosmosDB.BulkExecutor" Version="2.0.0-preview" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

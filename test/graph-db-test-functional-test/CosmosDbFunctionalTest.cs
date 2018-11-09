@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace graph_db_test_functional_test
@@ -9,16 +9,14 @@ namespace graph_db_test_functional_test
     [TestClass]
     public class CosmosDbFunctionalTest
     {
-
         [TestMethod]
         public void DoDatabaseCheck()
         {
-
             var cosmosDbKey = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
             if (cosmosDbKey == null)
             {
-                Assert.Inconclusive("Is not executed in the build context");
+                Assert.Inconclusive("Test is not executed in the build context");
             }
             else
             {
@@ -28,7 +26,7 @@ namespace graph_db_test_functional_test
                     ConnectionProtocol = Protocol.Tcp
                 };
 
-                FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, PartitionKey = new Microsoft.Azure.Documents.PartitionKey("1") };
+                var queryOptions = new FeedOptions { MaxItemCount = -1, PartitionKey = new PartitionKey("1") };
 
                 var documentClient = new DocumentClient(new Uri("https://localhost:8081"),
                     cosmosDbKey, connectionPolicy);
@@ -39,7 +37,6 @@ namespace graph_db_test_functional_test
 
                 Assert.AreEqual(57911, result[0].Value);
             }
-
         }
     }
 }

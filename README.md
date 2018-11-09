@@ -61,8 +61,8 @@ The above script will perform the following actions;
 3. Create Cosmos DB database if needed.
 4. Recreate Cosmos DB collection with specified RU throughput and partition key. This can be prevented by passing an additional flag to the script.
 5. Create an Azure Container Registry if needed.
-6. Use [ACR Build](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-quick-build) to create and publish docker image of the application if needed. This can also be forced with an additional flag to the script. **Note:** Since the [Windows Server Core base images](https://hub.docker.com/r/microsoft/dotnet-framework/tags/) are considerably large, it takes several minutes for the build to complete.
-7. Based on the provisioned Cosmos DB RU, create `Min(RU/10000, 20)` Azure Container Instances. Each ACI Id will be passed to the application's `-r` parameter.
+6. Use [ACR Build](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-quick-build) to create and publish docker image of the application if needed. This can also be forced with an additional flag to the script.
+7. Based on the provisioned Cosmos DB RU, create `Min(RU/10000, 100)` Azure Container Instances. Each ACI Id will be passed to the application's `-r` parameter.
 
 ## Resources
 

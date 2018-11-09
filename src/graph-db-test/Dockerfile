@@ -1,7 +1,7 @@
-FROM microsoft/dotnet-framework:4.7.2-runtime-windowsservercore-ltsc2016 AS base
+FROM microsoft/dotnet:2.1-runtime-alpine AS base
 WORKDIR /app
 
-FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-ltsc2016 AS build
+FROM microsoft/dotnet:2.1-sdk-alpine AS build
 WORKDIR /src
 COPY graph-db-test.csproj graph-db-test/
 RUN dotnet restore graph-db-test/graph-db-test.csproj
@@ -15,4 +15,4 @@ RUN dotnet publish graph-db-test.csproj -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["graph-db-test.exe"]
+ENTRYPOINT ["dotnet", "graph-db-test.dll"]
