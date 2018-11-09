@@ -26,7 +26,7 @@ steps:
   
 - task: VSTest@2
   inputs:
-    testAssemblyVer2: '**\graph-db-test-tests.dll'
+    testAssemblyVer2: '**\graph-db-test-tests.dll!**\*TestAdapter.dll!**\obj\**'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
