@@ -12,36 +12,28 @@ variables:
   buildConfiguration: 'Release'
 
 steps:    
-- task: NuGetToolInstaller@0
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Build'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+- script: dotnet test test\graph-db-test-tests --logger trx
+  displayName: 'Run unit tests'
   
-- task: VSTest@2
-  inputs:
-    testAssemblyVer2: '**\graph-db-test-tests.dll!**\*TestAdapter.dll!**\obj\**'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
 - task: PowerShell@2
+  displayName: 'Start Cosmos DB emulator'
   inputs:
     targetType: filePath
     filePath: ./build-pipeline/create-cosmosdb-emulator.ps1
 
 - task: BatchScript@1
+  displayName: 'Generate graph data'
   inputs:
     filename: ./build-pipeline/run-graph-db-test.bat
 
-- task: VSTest@2
+- script: dotnet test test\graph-db-test-functional-test --logger trx
+  displayName: 'Run functional tests'
+
+- task: PublishTestResults@2
   inputs:
-    testAssemblyVer2: '**\graph-db-test-functional-test.dll'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
 
