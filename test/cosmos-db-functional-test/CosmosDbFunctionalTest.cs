@@ -4,7 +4,7 @@ using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace graph_db_test_functional_test
+namespace cosmos_db_functional_test
 {
     [TestClass]
     public class CosmosDbFunctionalTest

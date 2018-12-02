@@ -1,39 +1,51 @@
-# .NET Desktop
-# Build and run tests for .NET Desktop or Windows classic desktop solutions.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/vsts/pipelines/apps/windows/dot-net
-
-pool:
-  vmImage: 'VS2017-Win2016'
-
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-steps:    
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'Build'
+jobs:
+- job: CosmosDB
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - script: dotnet build --configuration $(buildConfiguration)
+      displayName: 'Build'
 
-- script: dotnet test test\graph-db-test-tests --logger trx
-  displayName: 'Run unit tests'
-  
-- task: PowerShell@2
-  displayName: 'Generate Cosmos DB graph data'
-  inputs:
-    targetType: filePath
-    filePath: ./build-pipeline/run-cosmosdb-test.ps1
+    - script: dotnet test test/graph-db-test-tests --logger trx
+      displayName: 'Run unit tests'
 
-- task: PowerShell@2
-  displayName: 'Generate SQL DB graph data'
-  inputs:
-    targetType: filePath
-    filePath: ./build-pipeline/run-sqldb-test.ps1
+    - task: PowerShell@2
+      displayName: 'Generate graph data'
+      inputs:
+        targetType: filePath
+        filePath: ./build-pipeline/run-cosmosdb-test.ps1
 
-- script: dotnet test test\graph-db-test-functional-test --logger trx
-  displayName: 'Run functional tests'
+    - script: dotnet test test/cosmos-db-functional-test --logger trx
+      displayName: 'Run functional tests'
 
-- task: PublishTestResults@2
-  inputs:
-    testRunner: VSTest
-    testResultsFiles: '**/*.trx'
+    - task: PublishTestResults@2
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: '**/*.trx'
+
+- job: SQLDB
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - script: dotnet build --configuration $(buildConfiguration)
+      displayName: 'Build'
+
+    - script: dotnet test test/graph-db-test-tests --logger trx
+      displayName: 'Run unit tests'
+
+    - task: Bash@3
+      displayName: 'Generate graph data'
+      inputs:
+        targetType: filePath
+        filePath: ./build-pipeline/run-sqldb-test.sh
+
+    - script: dotnet test test/sql-db-functional-test --logger trx
+      displayName: 'Run functional tests'
+
+    - task: PublishTestResults@2
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: '**/*.trx'

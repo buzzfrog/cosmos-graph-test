@@ -2,7 +2,7 @@
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace graph_db_test_functional_test
+namespace sql_db_functional_test
 {
     [TestClass]
     public class SqlDatabaseFunctionalTest

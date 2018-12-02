@@ -11,4 +11,4 @@ New-CosmosDbCollection -Context $COSMOSDB_CONTEXT -Id $COLLECTION -PartitionKey 
 
 $CONNECTION_STRING = "AccountEndpoint=https://localhost:8081;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;ApiKind=Gremlin;database=$DATABASE;collection=$COLLECTION"
 
-dotnet run -c Release -p .\src\graph-db-test\ --no-launch-profile -- -b 10000 -r 1 -c $CONNECTION_STRING -n 5 -a 10 -w 0
+dotnet run -c Release -p ./src/graph-db-test --no-launch-profile -- -b 10000 -r 1 -c $CONNECTION_STRING -n 5 -a 10 -w 0
