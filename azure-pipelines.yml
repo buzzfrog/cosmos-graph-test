@@ -24,6 +24,12 @@ steps:
     targetType: filePath
     filePath: ./build-pipeline/run-cosmosdb-test.ps1
 
+- task: PowerShell@2
+  displayName: 'Generate SQL DB graph data'
+  inputs:
+    targetType: filePath
+    filePath: ./build-pipeline/run-sqldb-test.ps1
+
 - script: dotnet test test\graph-db-test-functional-test --logger trx
   displayName: 'Run functional tests'
 
