@@ -1,8 +1,8 @@
 & "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" /noui
 Install-Module -Name CosmosDB -Force
 
-$DATABASE = dbtest
-$COLLECTION = coltest
+$DATABASE = "dbtest"
+$COLLECTION = "coltest"
 
 $COSMOSDB_CONTEXT = New-CosmosDbContext -Emulator -Database $DATABASE
 New-CosmosDbDatabase -Context $COSMOSDB_CONTEXT -Id $DATABASE
