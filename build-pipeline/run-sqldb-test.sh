@@ -26,6 +26,5 @@ done
 
 docker exec $CONTAINER /opt/mssql-tools/bin/sqlcmd -S tcp:localhost,$PORT -d $DATABASE -U $USER -P $PASSWORD -i /sql-server/ddl.sql
 
-$CONNECTION_STRING = "Server=tcp:localhost,$PORT;Initial Catalog=$DATABASE;Persist Security Info=False;User ID=sa;Password=$PASSWORD;MultipleActiveResultSets=False;Connection Timeout=30;"
-
+CONNECTION_STRING="Server=tcp:localhost,$PORT;Initial Catalog=$DATABASE;Persist Security Info=False;User ID=$USER;Password=$PASSWORD;MultipleActiveResultSets=False;Connection Timeout=30;"
 dotnet run -c Release -p ./src/graph-db-test --no-launch-profile -- -b 10000 -r 1 -c $CONNECTION_STRING -n 5 -a 10 -w 0
