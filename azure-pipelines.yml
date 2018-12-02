@@ -31,4 +31,3 @@ steps:
   inputs:
     testRunner: VSTest
     testResultsFiles: '**/*.trx'
-
