@@ -19,15 +19,10 @@ steps:
   displayName: 'Run unit tests'
   
 - task: PowerShell@2
-  displayName: 'Start Cosmos DB emulator'
+  displayName: 'Generate Cosmos DB graph data'
   inputs:
     targetType: filePath
-    filePath: ./build-pipeline/create-cosmosdb-emulator.ps1
-
-- task: BatchScript@1
-  displayName: 'Generate graph data'
-  inputs:
-    filename: ./build-pipeline/run-graph-db-test.bat
+    filePath: ./build-pipeline/run-cosmosdb-test.ps1
 
 - script: dotnet test test\graph-db-test-functional-test --logger trx
   displayName: 'Run functional tests'
