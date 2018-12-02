@@ -23,7 +23,7 @@ while : ; do
     [ -z "$DOCKER_STATUS" ] || break
 done
 
-docker exec -it $CONTAINER /opt/mssql-tools/bin/sqlcmd -S tcp:localhost,$PORT -d $DATABASE -i /sql-server/ddl.sql
+docker exec $CONTAINER /opt/mssql-tools/bin/sqlcmd -S tcp:localhost,$PORT -d $DATABASE -i /sql-server/ddl.sql
 
 $CONNECTION_STRING = "Server=tcp:localhost,$PORT;Initial Catalog=$DATABASE;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Connection Timeout=30;"
 
